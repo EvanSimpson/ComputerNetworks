@@ -41,9 +41,8 @@ def read_pin(pin):
 def delay(duration):
     time.sleep(duration)
 
-def receive(duration=.025, pin=23):
+def receive(duration=.0025, pin=23):
     prepare_pin(pin)
-    #delay(2)
     bin_string = ""
     buffer = []
     msg_start = False
@@ -52,8 +51,6 @@ def receive(duration=.025, pin=23):
         if read_pin(pin):
             msg_start = True
             buffer.append(1)
-            #bin_string+="1"
-            #print(read_pin(pin))
             zero_cnt = 0
             delay(duration)
         elif msg_start:
@@ -62,8 +59,6 @@ def receive(duration=.025, pin=23):
                 msg_start = False
                 break
             buffer.append(0)
-            #bin_string+="0"
-            #print(0)
             delay(duration)
     zeroes = 0
     ones = 0
@@ -96,14 +91,6 @@ def receive(duration=.025, pin=23):
                 zeroes = 0      
     print(bin2message(bin_string))
     return bin2message(bin_string)
-
-        #if len(buffer)>=4:
-        #    if buffer[0:4] == [0,0,0]:
-        #        bin_string = bin_string + "0"
-        #        buffer = []
-        #    else if buffer[0:4] == [1,1,1]:
-        #        bin_string = bin_string + "1"
-        #        buffer = []
     
                 
 def bin2message(bin):
@@ -111,12 +98,8 @@ def bin2message(bin):
     bin is binary string which encodes the message
     returns the uncoded message
   '''
-  letters = [word.split('000') for word in bin.split("0"*7)] 
-  #letters = [[l+"0" for l in letter if len(l) > 0] for letter in letters]
-  print(bin)
-  print(letters)
+  letters = [word.split('000') for word in bin.split("0"*7)]
   return ' '.join(map(bin2words, letters))
-  print(' '.join(map(bin2words, letters)))
 
 def bin2words(letters):
   '''
