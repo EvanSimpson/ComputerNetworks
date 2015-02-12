@@ -16,7 +16,7 @@ def bin2message(bin):
       words.pop()
   letters = [word.split('000') for word in words] 
  
-  return ' '.join(map(bin2words, letters))
+  return ' '.join(map(bin2morse, letters))
 
  
 def message2bin(message):
@@ -24,7 +24,7 @@ def message2bin(message):
   message = message.upper()
   return '0000'.join(map(word2letters, message.split(' ')))+'0000' 
 
-def bin2words(letters):
+def bin2morse(letters):
   '''
     letters is a list of binary letters
   '''
