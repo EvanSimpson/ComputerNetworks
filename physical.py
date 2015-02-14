@@ -14,15 +14,14 @@ def bin2message(bin):
   words = bin.split("0"*7) #this should really be 7, when the other code is fixed
   if words[len(words)-1] == "":
       words.pop()
-  letters = [word.split('000') for word in words] 
- 
+  letters = [word.split('000') for word in words]
+
   return ' '.join(map(bin2morse, letters))
 
- 
 def message2bin(message):
   # input is a whole message
   message = message.upper()
-  return '0000'.join(map(word2letters, message.split(' ')))+'0000' 
+  return '0000'.join(map(word2letters, message.split(' ')))+'0000'
 
 def bin2morse(letters):
   '''
@@ -33,14 +32,14 @@ def bin2morse(letters):
 def morse2bin(code):
   # input is a full string code like "--."
   return ''.join([morseBin[x] for x in list(code)])
-  
+
 def morse2letters(morse):
   '''
     morse is a morse encoded message as a list of morse letters
   '''
   return letters2words([UNCODE[morse_letter] for morse_letter in morse])
 
-def letter2morse(letter): 
+def letter2morse(letter):
   # input is a single letter
   return morse2bin(CODE[letter])
 
