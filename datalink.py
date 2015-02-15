@@ -26,25 +26,19 @@ class Mac():
 		outputs the parts (header and payload) concatonated into a string in 
 		the order: destination, source, next protocol, payload, checksum
 		'''
-		return self.destination + self.source + self.next_protocol + self.payload + self.create_message_checksum()
+		return self.destination + self.source + self.next_protocol + self.payload + self.create_checksum(self.payload)
 
-	def verify(self, parsed_payload, parsed_checksum):
+	def verify_payload(self, parsed_payload, parsed_checksum):
 		'''
 		uses the checksum to make sure the proper message was received and decoded
 		'''
-		return True #self.generate_checksum_value(parsed_payload+parsed_checksum) == 0
+		return self.create_checksum(parsed_payload) == parsed_checksum
 
-	def create_message_checksum(self):
+	def create_checksum(self, payload):
 		'''
 		creates string version of the crc and outputs the checksum value as a string 
 		'''
-		return self.generate_checksum_value(self.payload) #.toString()
-
-	def generate_checksum_value(self, payload):
-		'''
-		does all the fancy stuff maor and evan are writing 
-		'''
-		return ""
+		return dothecrcthing(message2bin(payload))
 
 def encode_message(mac_obj):
 	'''
@@ -54,19 +48,22 @@ def encode_message(mac_obj):
 
 def decode_message(mac_text):
 	'''
-	convert the mac object string into a mac object 
+	converts the mac object string into a mac object, 
+	verifies that the payload has been properly transmitted, 
+	and outputs the verified mac object
 	'''
+	
 	destination = mac_text[0]
 	source = mac_text[1]
 	next_protocol = mac_text[2:5]
 	payload = mac_text[5:len(mac_text)-2]
-	checksum = mac_text[len(mac_text)-2]
+	checksum = mac_text[len(mac_text)-2:]
 	
 	mac_obj = Mac(destination, source, next_protocol, payload)
 
-	if mac_obj.verify(payload, checksum):
+	if mac_obj.verify_payload(payload, checksum):
 		return mac_obj
 	else:
-		return "NO"
+		raise Exception('The message was incorrectly transmitted.')
 
 
