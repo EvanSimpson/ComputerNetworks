@@ -88,11 +88,10 @@ def receive(duration=.0025, pin=23):
                     bin_string += "000"
                 else:
                     bin_string += "0000000"
-                zeroes = 0      
+                zeroes = 0
     print(bin2message(bin_string))
     return bin2message(bin_string)
-    
-                
+
 def bin2message(bin):
   '''
     bin is binary string which encodes the message
@@ -117,7 +116,7 @@ def letters2words(letters):
   '''
     letters is a list of letters
   '''
-  return ''.join(letters)            
+  return ''.join(letters)
 
 if __name__ == "__main__":
   with Safeguards():

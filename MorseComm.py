@@ -103,7 +103,7 @@ def blink_off(duration=1, for_what=17):
 
 def bin2message(bin):
   '''
-  	bin is binary string which encodes the message
+    bin is binary string which encodes the message
     returns the uncoded message
   '''
   words = bin.split("0"*5) #this should really be 7, when the other code is fixed
@@ -113,20 +113,20 @@ def bin2message(bin):
   return ' '.join(map(bin2words, letters))
 
 def bin2words(letters):
-	'''
-		letters is a list of binary letters
-	'''
-	return morse2letters(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
+  '''
+    letters is a list of binary letters
+  '''
+  return morse2letters(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
 
 def morse2letters(morse):
   '''
-  	morse is a morse encoded message as a list of morse letters
+    morse is a morse encoded message as a list of morse letters
   '''
   return letters2words([UNCODE[morse_letter] for morse_letter in morse])
 
 def letters2words(letters):
   '''
-  	letters is a list of letters
+    letters is a list of letters
   '''
   return ''.join(letters)
 
