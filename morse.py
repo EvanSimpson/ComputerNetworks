@@ -9,4 +9,4 @@ if __name__ == "__main__":
   print(stack.ascend(stack.descend("what a pal")))
 
   mac_header_obj = Mac('A', 'B', "NET", "HERESOMEDATA")
-  print(decode_message(encode_message(mac_header_obj)).payload)
+  print(str(decode_message(encode_message(mac_header_obj))))

@@ -1,3 +1,4 @@
+from crc import crc
 addresses = ['A', 'B', 'C', 'D']
 protocols = ['NET']
 
@@ -13,6 +14,10 @@ class Mac():
 		self.payload = payload
 		self.verify_arguments()
 
+	def __str__(self):
+		to_string = "[ " + "Destinstion: " + self.destination + ", Source: " + self.source +", Next Protocol: " + self.next_protocol +", Payload: " + self.payload + " ]"
+		return to_string
+		
 	def verify_arguments(self):
 		if not self.destination in addresses: 
 			raise ValueError("That is not a valid destination.")
@@ -38,13 +43,13 @@ class Mac():
 		'''
 		creates string version of the crc and outputs the checksum value as a string 
 		'''
-		return dothecrcthing(self.payload_to_binary())
+		return crc(self.payload_to_binary())
 
 	def payload_to_binary(self):
 		'''
 		turns the payload into a binary string
 		'''
-		return ''.join(['%08d'%int(bin(ord(i))[2:]) for i in payload])
+		return ''.join(['%08d'%int(bin(ord(i))[2:]) for i in self.payload])
 
 def encode_message(mac_obj):
 	'''
