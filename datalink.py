@@ -38,7 +38,13 @@ class Mac():
 		'''
 		creates string version of the crc and outputs the checksum value as a string 
 		'''
-		return dothecrcthing(message2bin(payload))
+		return dothecrcthing(self.payload_to_binary())
+
+	def payload_to_binary(self):
+		'''
+		turns the payload into a binary string
+		'''
+		return ''.join(['%08d'%int(bin(ord(i))[2:]) for i in payload])
 
 def encode_message(mac_obj):
 	'''
