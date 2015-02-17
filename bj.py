@@ -6,20 +6,19 @@ class BJ_Stack():
 
   def ascend(self, message):
     '''
-      UP WE GPI-GO
-      GPI-JOES
+      ascend the stack
     '''
     return self.up_step(self._ascend, message)
 
   def descend(self, message):
     '''
-      WE GOING DOWN
+      descend the stack
     '''
     return self.down_step(self._descend, message)
 
   def up_step(self, stack, message):
     '''
-      #BABYSTEPS
+      port the message up one level
     '''
     if len(stack) == 0:
       return message
@@ -28,7 +27,7 @@ class BJ_Stack():
 
   def down_step(self, stack, message):
     '''
-      #BABYSTEPS
+      port the message down one level
     '''
     if len(stack) == 0:
       return message
@@ -56,6 +55,7 @@ class BJ():
 
 if __name__ == "__main__":
     '''
+      main function to transmit up/down the stack
     '''
     def forward(argument):
         return argument - 1
