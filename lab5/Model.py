@@ -9,6 +9,8 @@ def makePositionDict(word):
 
 class Model():
   def __init__(self, text):
+    self._word = text
+    self.blanks = '_'*len(text)
     self._positions = makePositionDict(text)
     self._remaining = list(self._positions.keys())
     self.strikes = 0
@@ -18,6 +20,8 @@ class Model():
     if positions == False:
       self.strikes += 1
     else:
+        for i in positions:
+            self.blanks = ''.join([(x, letter)[i in positions] for i,x in enumerate(self.blanks)])
         self._remaining.remove(letter)
     return positions
 
