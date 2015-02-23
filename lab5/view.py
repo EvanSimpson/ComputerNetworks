@@ -40,7 +40,7 @@ fiv_hit = ('                    \n' +
           '      |     /|\     \n' +
           '      |     /       \n' +
           '    -----           \n')
-gameover = ('    GAME OVER       \n' +
+six_hit = ('    GAME OVER       \n' +
           '      +------+      \n' +
           '      |      |      \n' +
           '      |      0      \n' +
@@ -48,7 +48,7 @@ gameover = ('    GAME OVER       \n' +
           '      |     / \     \n' +
           '    -----           \n')
 screens = [blank, one_hit, two_hit, thr_hit,
-           for_hit, fiv_hit]
+           for_hit, fiv_hit, six_hit]
 
 class View():
   """

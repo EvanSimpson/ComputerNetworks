@@ -10,7 +10,7 @@ class Hangman(object):
         self.ownIP = IP
         self.ownPort = port
         #self.view = view.view
-        self.maxStrikes = 5
+        self.maxStrikes = 6
         self.gameState = "setup"
         self.guessed = []
         self.mode = "uninitialized"
