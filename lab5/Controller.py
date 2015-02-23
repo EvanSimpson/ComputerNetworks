@@ -1,6 +1,7 @@
 import sys
 import CN_Sockets
 import Model
+import view as View
 
 class Hangman(object):
 
@@ -9,10 +10,11 @@ class Hangman(object):
         self.ownIP = IP
         self.ownPort = port
         #self.view = view.view
-        self.maxStrikes = 6
+        self.maxStrikes = 5
         self.gameState = "setup"
         self.guessed = []
         self.mode = "uninitialized"
+        self.state = "uninitialized"
 
     def becomeHost(self):
         self.mode = 'host'
@@ -89,6 +91,7 @@ class Hangman(object):
                                 continue
 
                             self.model = Model.Model(inputWord.lower())
+                            self.view = View.View('_'*len(inputWord), [], 0)
                             self.sendWordToClient(inputWord.lower())
                             self.state = 'play'
 
@@ -102,11 +105,14 @@ class Hangman(object):
                                     if input_letter not in self.guessed:
                                         self.guessed.append(input_letter)
                                         newPositions = self.model.checkPosition(input_letter)
+                                        self.view.guess = self.guessed
+                                        self.view.hits = self.model.strikes
+                                        self.view.word = self.model.blanks
                                         if self.model.strikes == self.maxStrikes:
-                                            self.state = 'lose'
-                                        elif self.model.didWin():
                                             self.state = 'win'
-                                        # self.view.updateView()
+                                        elif self.model.didWin():
+                                            self.state = 'lose'
+                                        self.view.redraw_screen()
                                         continue
                                 elif input_letter == "quit":
                                     print('Partner has left.')
@@ -133,6 +139,7 @@ class Hangman(object):
                     while self.state == 'ready':
                         try:
                             inputWord, hostAddress = sock.recvfrom(1024)
+                            self.view = View.View('_'*len(inputWord), [], 0)
                             self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
                         except:
@@ -147,11 +154,14 @@ class Hangman(object):
                             if inputLetter not in self.guessed:
                                 self.guessed.append(inputLetter)
                                 newPositions = self.model.checkPosition(inputLetter)
+                                self.view.guess = self.guessed
+                                self.view.hits = self.model.strikes
+                                self.view.word = self.model.blanks
                                 if self.model.strikes == self.maxStrikes:
                                     self.state = 'lose'
                                 elif self.model.didWin():
                                     self.state = 'win'
-                                # self.view.updateView()
+                                self.view.redraw_screen()
                                 continue
                         elif inputLetter == "quit":
                             print('Quitting...')
