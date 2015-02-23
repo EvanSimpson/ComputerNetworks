@@ -62,7 +62,7 @@ class Hangman(object):
                     print("\nPlease enter a valid option")
 
             elif self.mode == 'host':
-                with self.socket(AF_INET,SOCK_DGRAM) as sock:
+                with self.socket(self.AF_INET, self.SOCK_DGRAM) as sock:
                     self.sock = sock
                     # Get input word
                     while True:
@@ -82,7 +82,7 @@ class Hangman(object):
                             except:
                                 continue
 
-                        while self.state = 'ready'
+                        while self.state == 'ready':
                             inputWord = input("Enter the word to be guessed:\n")
                             if not inputWord.isalpha():
                                 print('The word must only contain the letters a-z.')
@@ -117,14 +117,14 @@ class Hangman(object):
                                 continue
 
             elif self.mode == 'client':
-                with socket(AF_INET,SOCK_DGRAM) as sock:
+                with self.socket(self.AF_INET, self.SOCK_DGRAM) as sock:
                     self.sock = sock
 
                     # Get user to manually input host IP/port
                     while self.state == 'initialized':
                         inputIP = input('Please input the host IP Address\n')
                         inputPort = input('Please input the host Port\n')
-                        self.hostAddress = (inputIP, inputPort)
+                        self.hostAddress = (inputIP, int(inputPort))
                         self.sendReady()
                         self.state = 'ready'
 
@@ -142,10 +142,10 @@ class Hangman(object):
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
                         self.sendLetterToHost(inputLetter)
 
-                        if len(input_letter) == 1:
-                            if input_letter not in self.guessed:
-                                self.guessed.append(input_letter)
-                                newPositions = self.model.checkPosition(input_letter)
+                        if len(inputLetter) == 1:
+                            if inputLetter not in self.guessed:
+                                self.guessed.append(inputLetter)
+                                newPositions = self.model.checkPosition(inputLetter)
                                 if self.model.strikes == self.maxStrikes:
                                     self.state = 'lose'
                                 elif self.model.didWin():
@@ -153,7 +153,7 @@ class Hangman(object):
                                 print(self.guessed)
                                 # self.view.updateView()
                                 continue
-                        elif input_letter == "quit":
+                        elif inputLetter == "quit":
                             print('Quitting...')
                             sys.exit(0)
 
