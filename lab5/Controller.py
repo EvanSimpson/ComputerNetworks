@@ -140,6 +140,8 @@ class Hangman(object):
                     # Begin game
                     while self.state == 'play':
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
+                        self.sendLetterToHost(inputLetter)
+
                         if len(input_letter) == 1:
                             if input_letter not in self.guessed:
                                 self.guessed.append(input_letter)
