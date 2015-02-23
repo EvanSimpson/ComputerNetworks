@@ -10,16 +10,23 @@ def makePositionDict(word):
 class Model():
   def __init__(self, text):
     self._positions = makePositionDict(text)
+    self._remaining = list(self._positions.keys())
     self.strikes = 0
 
   def checkPosition(self, letter):
     positions = self._positions.get(letter, False)
     if positions == False:
       self.strikes += 1
+    else:
+        self._remaining.remove(letter)
     return positions
+
+  def didWin(self):
+    return len(self._remaining) == 0
 
   def reset(self, newText):
     self._positions = makePositionDict(newText)
+    self._remaining = list(self._positions.keys())
     self.strikes = 0
 
 
@@ -28,5 +35,9 @@ if __name__ == "__main__":
   print(model.checkPosition('e'))
   print(model.checkPosition('g'))
   print(model.strikes)
+  print(model.didWin())
   model.reset('goodbye')
   print(model.checkPosition('o'))
+  model.reset('g')
+  print(model.checkPosition('g'))
+  print(model.didWin())
