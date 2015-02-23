@@ -106,7 +106,6 @@ class Hangman(object):
                                             self.state = 'lose'
                                         elif self.model.didWin():
                                             self.state = 'win'
-                                        print(self.guessed)
                                         # self.view.updateView()
                                         continue
                                 elif input_letter == "quit":
@@ -115,6 +114,8 @@ class Hangman(object):
 
                             except:
                                 continue
+
+                        break
 
             elif self.mode == 'client':
                 with self.socket(self.AF_INET, self.SOCK_DGRAM) as sock:
@@ -132,7 +133,7 @@ class Hangman(object):
                     while self.state == 'ready':
                         try:
                             inputWord, hostAddress = sock.recvfrom(1024)
-                            self.model = Model.Model(inputWord)
+                            self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
                         except:
                             continue
@@ -150,14 +151,19 @@ class Hangman(object):
                                     self.state = 'lose'
                                 elif self.model.didWin():
                                     self.state = 'win'
-                                print(self.guessed)
                                 # self.view.updateView()
                                 continue
                         elif inputLetter == "quit":
                             print('Quitting...')
                             sys.exit(0)
 
+            if self.state == 'win':
+                print("You win!")
+                break
 
+            if self.state == 'lose':
+                print("You lose!")
+                break
 
 if __name__ == "__main__":
    host = Hangman()
