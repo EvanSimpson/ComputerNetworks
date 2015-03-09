@@ -6,9 +6,10 @@ import View
 
 class Hangman(object):
 
-    def __init__(self,IP="localhost",port=5280):
+    def __init__(self,IP="10.7.24.124",port=5280):
         self.socket, self.AF_INET, self.SOCK_DGRAM, self.timeout = CN_Sockets.socket, CN_Sockets.AF_INET, CN_Sockets.SOCK_DGRAM, CN_Sockets.timeout
-        self.ownIP = socket.gethostbyname(socket.gethostname())
+        # self.ownIP = socket.gethostbyname(socket.gethostname())
+        self.ownIP = IP
         self.ownPort = port
         self.maxStrikes = 6
         self.gameState = "setup"
