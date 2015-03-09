@@ -1,5 +1,6 @@
 from datalink import Mac, encode_message, decode_message
 from physical import physical_down, physical_up
+from UDP import UDP, Layer4, encode_udp, decode_udp
 	
 class BJ_Stack():
 	def __init__(self, bjs):
@@ -66,9 +67,16 @@ if __name__ == "__main__":
 	def backward(argument):
 		return argument + 1
 
-	mo = Mac(ord('A'), ord('B'), ord("N"), bytearray("HELLO", encoding = "UTF-8"))	
+	#mac = Mac(ord('A'), ord('B'), 1, bytearray("HELLO", encoding="UTF-8"))	
+	
+	layer4 = Layer4()
+	layer4.setFields(1, 2, bytearray('hello there', encoding='UTF-8'))
+	udp_obj = UDP(layer4, ord("A"), ord("B")) #should these be 2 characters?
+	
 	mac_layer = BJ(encode_message, decode_message)
 	physical_layer = BJ(physical_down, physical_up)
-	stack = BJ_Stack([mac_layer, physical_layer])
+	udp_layer = BJ(encode_udp, decode_udp)
+	
+	stack = BJ_Stack([udp_layer, mac_layer, physical_layer])
 
-	print(stack.ascend(stack.descend(mo)))
+	print(stack.ascend(stack.descend(udp_obj)))

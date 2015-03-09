@@ -1,6 +1,6 @@
 #from crc import crc
 addresses = [ord('A'), ord('B'), ord('C'), ord('D')]
-protocols = [ord('N')]
+protocols = [1]
 
 class Mac():
 

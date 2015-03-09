@@ -1,9 +1,33 @@
+from datalink import Mac
+
 def byteArrayToInt(data):
     length = len(data)
     val = 0
     for i in range(length):
         val |= data[length-(i+1)] << (i*8)
     return val
+
+def encode_udp(udp_obj):
+    print(type(udp_obj))
+    return udp_obj.layer3.serialize()
+
+def decode_udp(mac_obj): #change this to be a mac object not a bytearray
+    header = Layer3()
+    header.parseFields(mac_obj)
+
+    packetObj = Layer4()
+    packetObj.parseFields(header._payload)
+
+    return packetObj._payload
+
+class UDP(object):
+
+    def __init__(self, layer4, srcAddr, destAddr):
+        self.layer4 = layer4
+        self.packet = self.layer4.serialize()
+
+        self.layer3 = Layer3()
+        self.layer3.setFields(srcAddr, destAddr, 1, self.packet)
 
 class Layer3(object):
     def __init__(self):
@@ -14,30 +38,33 @@ class Layer3(object):
         self._destinationAddress = destAddr
         self._nextProtocol = protocol
         self._payloadLength = len(udpPacket)
+        self._payload = udpPacket
 
     def serialize(self):
-        header = bytearray([
-            (self._sourceAddress >> 24) & 0xFF,
-            (self._sourceAddress >> 16) & 0xFF,
-            (self._sourceAddress >> 8) & 0xFF,
-            self._sourceAddress & 0xFF,
-            (self._destinationAddress >> 24) & 0xFF,
-            (self._destinationAddress >> 16) & 0xFF,
-            (self._destinationAddress >> 8) & 0xFF,
-            self._destinationAddress & 0xFF,
-            0x00,
-            self._nextProtocol & 0xFF,
-            (self._payloadLength >> 8) & 0xFF,
-            self._payloadLength & 0xFF
-        ])
-        return header
+        # packet = bytearray([
+        #     (self._sourceAddress >> 24) & 0xFF,
+        #     (self._sourceAddress >> 16) & 0xFF,
+        #     (self._sourceAddress >> 8) & 0xFF,
+        #     self._sourceAddress & 0xFF,
+        #     (self._destinationAddress >> 24) & 0xFF,
+        #     (self._destinationAddress >> 16) & 0xFF,
+        #     (self._destinationAddress >> 8) & 0xFF,
+        #     self._destinationAddress & 0xFF,
+        #     0x00,
+        #     self._nextProtocol & 0xFF,
+        #     (self._payloadLength >> 8) & 0xFF,
+        #     self._payloadLength & 0xFF
+        # ]) + self._payload
+        print(self._nextProtocol)
+        return Mac(self._destinationAddress, self._sourceAddress, self._nextProtocol, self._payload)
 
-    def parseFields(self, data):
+    def parseFields(self, mac_obj):
         # why are these addresses so long
-        self._sourceAddress = byteArrayToInt(data[0:4])
-        self._destinationAddress = byteArrayToInt(data[4:8])
-        self._nextProtocol = data[9]
-        self._payloadLength = byteArrayToInt(data[10:])
+        self._sourceAddress = mac_obj.source #byteArrayToInt(data[0:4])
+        self._destinationAddress = mac_obj.destination #byteArrayToInt(data[4:8])
+        self._nextProtocol = mac_obj.next_protocol #data[9]
+        self._payloadLength = byteArrayToInt(mac_obj.payload, encoding="UTF-8") #byteArrayToInt(data[10:12])
+        self._payload = mac_obj.payload
 
 class Layer4(object):
     def __init__(self):
