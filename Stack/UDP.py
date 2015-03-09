@@ -63,7 +63,7 @@ class Layer3(object):
         self._sourceAddress = mac_obj.source #byteArrayToInt(data[0:4])
         self._destinationAddress = mac_obj.destination #byteArrayToInt(data[4:8])
         self._nextProtocol = mac_obj.next_protocol #data[9]
-        self._payloadLength = byteArrayToInt(mac_obj.payload, encoding="UTF-8") #byteArrayToInt(data[10:12])
+        self._payloadLength = byteArrayToInt(mac_obj.payload) #byteArrayToInt(data[10:12])
         self._payload = mac_obj.payload
 
 class Layer4(object):
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     print(udp.serialize())
 
     header = Layer3()
-    header.setFields(ord('A'), ord('B'), 2, udp.serialize())
+    header.setFields(ord('A'), ord('B'), 1, udp.serialize())
     print(header.serialize())
     header.parseFields(header.serialize())
     print(header.serialize())
