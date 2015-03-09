@@ -8,9 +8,13 @@ def byteArrayToInt(data):
     return val
 
 def encode_udp(udp_obj):
+    print("in encode udp")
+    print(udp_obj)
     return udp_obj.layer3.serialize()
 
 def decode_udp(mac_obj): #change this to be a mac object not a bytearray
+    print("in decode udp")
+    print (mac_obj.payload)
     header = Layer3()
     header.parseFields(mac_obj)
 
@@ -27,6 +31,17 @@ class UDP(object):
 
         self.layer3 = Layer3()
         self.layer3.setFields(srcAddr, destAddr, 1, self.packet)
+        print("::" + str(self.layer3._payload))
+
+    def __str__(self):
+        return "[ Destination Port: " + str(self.layer4._destinationPort) + "," \
+            "Source Port: " + str(self.layer4._sourcePort) + "," \
+            "Layer 4 Payload Length: " + str(self.layer4._length) + "," \
+            "Layer 4 Payload: " + str(self.layer4._payload) + "," \
+            "Source Address: " + chr(self.layer3._sourceAddress) + "," \
+            "Destination Address: " + chr(self.layer3._destinationAddress) + "," \
+            "Layer 3 Payload Length: " + str(self.layer3._payloadLength) + "," \
+            "Layer 3 Payload: " + str(self.layer3._payload)
 
 class Layer3(object):
     def __init__(self):
@@ -101,7 +116,6 @@ class Layer4(object):
             self._checksum >> 8,
             self._checksum & 0xFF
             ]) + self._payload
-        print()
         return packet
 
     def parseFields(self, data):

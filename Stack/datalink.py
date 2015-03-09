@@ -1,6 +1,6 @@
 #from crc import crc
 addresses = [ord('A'), ord('B'), ord('C'), ord('D')]
-protocols = [1]
+protocols = [1, 72]
 
 class Mac():
 
@@ -8,6 +8,7 @@ class Mac():
 		'''
 		Takes as input strings for each value of the
 		'''
+		#print("Next protocol is " + str(next_protocol))
 		self.destination = destination
 		self.source = source
 		self.next_protocol = next_protocol
@@ -24,7 +25,7 @@ class Mac():
 		if not self.source in addresses:
 			raise ValueError("This is not a valid source.")
 		if not self.next_protocol in protocols:
-			raise ValueError("That is not a valid next protocol code.")
+			raise ValueError(str(self.next_protocol) + " is not a valid next protocol code.")
 
 	def create_message(self):
 		'''
@@ -50,6 +51,7 @@ def encode_message(mac_obj):
 	'''
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
+	print("in encode mac")
 	print(mac_obj)
 	return mac_obj.create_message()
 
@@ -59,11 +61,13 @@ def decode_message(mac_bytearray):
 	verifies that the payload has been properly transmitted,
 	and outputs the verified mac object
 	'''
-
+	print("in decode mac")
+	print("mac ba is " + str(mac_bytearray))
 	destination = mac_bytearray[0]
 	source = mac_bytearray[1]
 	next_protocol = mac_bytearray[2]
-	payload = mac_bytearray[3:]
+	payload = mac_bytearray[2:]
+	print(payload)
 
 	return Mac(destination, source, next_protocol, payload)
 

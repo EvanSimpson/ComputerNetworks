@@ -1,9 +1,12 @@
 from codes import *
 
 def physical_up(input):
+  print("in physical up")
+  print(bin2bytearray(input))
   return bin2bytearray(input)
 
 def physical_down(input):
+  print("in physical down")
   return bytearray2bin(input)
 
 def bytearray2bin(bytearray_message):
@@ -67,6 +70,13 @@ def letters2words(letters):
 
 def word2letters(word):
   # input is a single word
-  print(letters)
   letters = list(word)
+  to_remove = []
+  for letter in letters:
+    if letter not in CODE:
+      to_remove.append(letter)
+  
+  for letter in to_remove:
+    letters.remove(letter)
+
   return '00'.join(map(letter2morse, letters))+'00'
