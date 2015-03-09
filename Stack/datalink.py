@@ -6,7 +6,7 @@ class Mac():
 
 	def __init__(self, destination, source, next_protocol, payload):
 		'''
-		Takes as input strings for each value of the 
+		Takes as input strings for each value of the
 		'''
 		self.destination = destination
 		self.source = source
@@ -15,11 +15,11 @@ class Mac():
 		self.verify_arguments()
 
 	def __str__(self):
-		to_string = "[ Destinstion: " + chr(self.destination) + ", Source: " + chr(self.source) +", Next Protocol: " + chr(self.next_protocol) +", Payload: " + str(self.payload) + " ]"
+		to_string = "[ Destination: " + chr(self.destination) + ", Source: " + chr(self.source) +", Next Protocol: " + chr(self.next_protocol) +", Payload: " + str(self.payload) + " ]"
 		return to_string
-		
+
 	def verify_arguments(self):
-		if not self.destination in addresses: 
+		if not self.destination in addresses:
 			raise ValueError("That is not a valid destination.")
 		if not self.source in addresses:
 			raise ValueError("This is not a valid source.")
@@ -28,7 +28,7 @@ class Mac():
 
 	def create_message(self):
 		'''
-		outputs the parts (header and payload) concatonated into a string in 
+		outputs the parts (header and payload) concatonated into a string in
 		the order: destination, source, next protocol, payload, checksum
 		'''
 		return bytearray([
@@ -55,13 +55,13 @@ def encode_message(mac_obj):
 
 def decode_message(mac_bytearray):
 	'''
-	converts the mac object string into a mac object, 
-	verifies that the payload has been properly transmitted, 
+	converts the mac object string into a mac object,
+	verifies that the payload has been properly transmitted,
 	and outputs the verified mac object
 	'''
 
 	destination = mac_bytearray[0]
-	source = mac_bytearray[1] 
+	source = mac_bytearray[1]
 	next_protocol = mac_bytearray[2]
 	payload = mac_bytearray[3:]
 
@@ -69,5 +69,5 @@ def decode_message(mac_bytearray):
 
 if __name__ == "__main__":
 
-	mo = Mac(ord('A'), ord('B'), ord("N"), bytearray("HELLO", encoding = "UTF-8"))	
+	mo = Mac(ord('A'), ord('B'), ord("N"), bytearray("HELLO", encoding = "UTF-8"))
 	encode_message(mo)
