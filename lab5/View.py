@@ -98,7 +98,3 @@ class View():
     self.window = ''
     self.window += gameover
     self.print_screen()
-
-# for testing
-if __name__ == '__main__':
-  View('test', ['x'], 3)

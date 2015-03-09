@@ -32,16 +32,3 @@ class Model():
     self._positions = makePositionDict(newText)
     self._remaining = list(self._positions.keys())
     self.strikes = 0
-
-
-if __name__ == "__main__":
-  model = Model("hello")
-  print(model.checkPosition('e'))
-  print(model.checkPosition('g'))
-  print(model.strikes)
-  print(model.didWin())
-  model.reset('goodbye')
-  print(model.checkPosition('o'))
-  model.reset('g')
-  print(model.checkPosition('g'))
-  print(model.didWin())

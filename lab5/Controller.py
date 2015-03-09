@@ -1,7 +1,7 @@
 import sys
 import CN_Sockets
 import Model
-import view as View
+import View
 
 class Hangman(object):
 
@@ -9,7 +9,6 @@ class Hangman(object):
         self.socket, self.AF_INET, self.SOCK_DGRAM, self.timeout = CN_Sockets.socket, CN_Sockets.AF_INET, CN_Sockets.SOCK_DGRAM, CN_Sockets.timeout
         self.ownIP = IP
         self.ownPort = port
-        #self.view = view.view
         self.maxStrikes = 6
         self.gameState = "setup"
         self.guessed = []
