@@ -67,6 +67,6 @@ def letters2words(letters):
 
 def word2letters(word):
   # input is a single word
-  letters = list(word)
   print(letters)
+  letters = list(word)
   return '00'.join(map(letter2morse, letters))+'00'

@@ -50,6 +50,7 @@ def encode_message(mac_obj):
 	'''
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
+	print(mac_obj)
 	return mac_obj.create_message()
 
 def decode_message(mac_bytearray):

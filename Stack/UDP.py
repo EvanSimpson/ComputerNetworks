@@ -8,7 +8,6 @@ def byteArrayToInt(data):
     return val
 
 def encode_udp(udp_obj):
-    print(type(udp_obj))
     return udp_obj.layer3.serialize()
 
 def decode_udp(mac_obj): #change this to be a mac object not a bytearray
@@ -55,7 +54,6 @@ class Layer3(object):
         #     (self._payloadLength >> 8) & 0xFF,
         #     self._payloadLength & 0xFF
         # ]) + self._payload
-        print(self._nextProtocol)
         return Mac(self._destinationAddress, self._sourceAddress, self._nextProtocol, self._payload)
 
     def parseFields(self, mac_obj):
@@ -103,6 +101,7 @@ class Layer4(object):
             self._checksum >> 8,
             self._checksum & 0xFF
             ]) + self._payload
+        print()
         return packet
 
     def parseFields(self, data):
