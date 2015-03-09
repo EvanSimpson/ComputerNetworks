@@ -68,6 +68,7 @@ class Hangman(object):
                     self.sock = sock
                     # Get input word
                     while True:
+                        print(self.ownIP)
                         self.sock.bind((self.ownIP, self.ownPort))
                         self.sock.settimeout(2.0)
 
