@@ -7,6 +7,7 @@ def physical_up(input):
 
 def physical_down(input):
   print("in physical down")
+  print(input)
   return bytearray2bin(input)
 
 def bytearray2bin(bytearray_message):

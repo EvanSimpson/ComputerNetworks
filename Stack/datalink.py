@@ -1,6 +1,6 @@
 #from crc import crc
-addresses = [ord('A'), ord('B'), ord('C'), ord('D')]
-protocols = [1, 72]
+addresses = ["A", "B", "C", "D"]
+protocols = [1]
 
 class Mac():
 
@@ -8,22 +8,21 @@ class Mac():
 		'''
 		Takes as input strings for each value of the
 		'''
-		#print("Next protocol is " + str(next_protocol))
-		self.destination = destination
-		self.source = source
-		self.next_protocol = next_protocol
+		self.destination = destination if type(destination) is bytearray else bytearray(destination, encoding="UTF-8")
+		self.source = source if type(source) is bytearray else bytearray(source, encoding="UTF-8")
+		self.next_protocol = next_protocol if type(next_protocol) is bytearray else bytearray(next_protocol, encoding="UTF-8")
 		self.payload = payload
-		self.verify_arguments()
+		#self.verify_arguments()
 
 	def __str__(self):
-		to_string = "[ Destination: " + chr(self.destination) + ", Source: " + chr(self.source) +", Next Protocol: " + chr(self.next_protocol) +", Payload: " + str(self.payload) + " ]"
+		to_string = "[ Destination: " + str(self.destination) + ", Source: " + str(self.source) +", Next Protocol: " + str(self.next_protocol) +", Payload: " + str(self.payload) + " ]"
 		return to_string
 
 	def verify_arguments(self):
-		if not self.destination in addresses:
-			raise ValueError("That is not a valid destination.")
-		if not self.source in addresses:
-			raise ValueError("This is not a valid source.")
+		if not self.destination in addresses and not chr(self.destination) in addresses:
+			raise ValueError(str(self.destination) + " is not a valid destination.")
+		if not self.source in addresses and not chr(self.destination) in addresses:
+			raise ValueError(str(self.source) + " is not a valid source.")
 		if not self.next_protocol in protocols:
 			raise ValueError(str(self.next_protocol) + " is not a valid next protocol code.")
 
@@ -32,14 +31,16 @@ class Mac():
 		outputs the parts (header and payload) concatonated into a string in
 		the order: destination, source, next protocol, payload, checksum
 		'''
-		return bytearray([
-			self.destination >> 8,
-			self.destination & 0xFF,
-			self.source >> 8,
-			self.source & 0xFF,
-			self.next_protocol >> 8,
-			self.next_protocol & 0xFF,
-			]) + self.payload
+
+		return self.destination + self.source + self.next_protocol + self.payload
+		#bytearray([
+		# 	ord(self.destination) >> 8,
+		# 	ord(self.destination) & 0xFF,
+		# 	ord(self.source) >> 8,
+		# 	ord(self.source) & 0xFF,
+		# 	self.next_protocol >> 8,
+		# 	self.next_protocol & 0xFF,
+		# 	]) + self.payload
 
 	def payload_to_binary(self):
 		'''
@@ -47,12 +48,12 @@ class Mac():
 		'''
 		return ''.join(['%08d'%int(bin(ord(i))[2:]) for i in self.payload])
 
-def encode_message(mac_obj):
+def encode_message(ip_bytearray):
 	'''
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
 	print("in encode mac")
-	print(mac_obj)
+	mac_obj = Mac("A", "B", '1', ip_bytearray)
 	return mac_obj.create_message()
 
 def decode_message(mac_bytearray):
@@ -62,12 +63,10 @@ def decode_message(mac_bytearray):
 	and outputs the verified mac object
 	'''
 	print("in decode mac")
-	print("mac ba is " + str(mac_bytearray))
-	destination = mac_bytearray[0]
-	source = mac_bytearray[1]
-	next_protocol = mac_bytearray[2]
-	payload = mac_bytearray[2:]
-	print(payload)
+	destination = mac_bytearray[0:1]
+	source = mac_bytearray[1:2]
+	next_protocol = mac_bytearray[2:3]
+	payload = mac_bytearray[3:]
 
 	return Mac(destination, source, next_protocol, payload)
 
