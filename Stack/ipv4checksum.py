@@ -14,5 +14,5 @@ def checksum(header):
 
 
 if __name__ == "__main__":
-	x = bytearray('BAAD0011')
-	checksum(x)
+	x = bytearray('BAAD0010')
+	print checksum(x)
