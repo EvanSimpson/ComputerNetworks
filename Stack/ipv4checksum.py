@@ -10,9 +10,9 @@ def checksum(header):
 		length = len(hex_header)
 
 	hex_header = '0'*(4 - length) + hex_header
-	return bytearray(hex_header)
+	return bytearray(hex_header, encoding="utf-8")
 
 
 if __name__ == "__main__":
-	x = bytearray('BAAD0010')
-	print checksum(x)
+	x = bytearray('BAAD0010', encoding="utf-8")
+	print(checksum(x))
