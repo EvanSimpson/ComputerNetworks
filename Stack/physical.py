@@ -1,4 +1,4 @@
-from code-s import *
+from codes import *
 
 def physical_up(input):
   return bin2bytearray(input)
