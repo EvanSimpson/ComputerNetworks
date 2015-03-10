@@ -61,13 +61,6 @@ if __name__ == "__main__":
 	'''
 		main function to transmit up/down the stack
 	'''
-	def forward(argument):
-		return argument - 1
-
-	def backward(argument):
-		return argument + 1
-
-	#mac = Mac(ord('A'), ord('B'), 1, bytearray("HELLO", encoding="UTF-8"))	
 	
 	udp_header = UDPHeader()
 	udp_header.setFields('1', '2', bytearray('HELLOWORLD', encoding='UTF-8'))

@@ -1,13 +1,9 @@
 from codes import *
 
 def physical_up(input):
-  print("in physical up")
-  print(bin2bytearray(input))
   return bin2bytearray(input)
 
 def physical_down(input):
-  print("in physical down")
-  print(input)
   return bytearray2bin(input)
 
 def bytearray2bin(bytearray_message):

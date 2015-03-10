@@ -1,4 +1,4 @@
-#from crc import crc
+from crc import crc
 addresses = ["A", "B", "C", "D"]
 protocols = [1]
 
@@ -12,6 +12,7 @@ class Mac():
 		self.source = source if type(source) is bytearray else bytearray(source, encoding="UTF-8")
 		self.next_protocol = next_protocol if type(next_protocol) is bytearray else bytearray(next_protocol, encoding="UTF-8")
 		self.payload = payload
+		self.calculate_checksum()
 		#self.verify_arguments()
 
 	def __str__(self):
@@ -26,21 +27,16 @@ class Mac():
 		if not self.next_protocol in protocols:
 			raise ValueError(str(self.next_protocol) + " is not a valid next protocol code.")
 
+	def calculate_checksum(self):
+		self.checksum = crc(self.destination + self.source + self.next_protocol + self.payload)
+
 	def create_message(self):
 		'''
 		outputs the parts (header and payload) concatonated into a string in
 		the order: destination, source, next protocol, payload, checksum
 		'''
 
-		return self.destination + self.source + self.next_protocol + self.payload
-		#bytearray([
-		# 	ord(self.destination) >> 8,
-		# 	ord(self.destination) & 0xFF,
-		# 	ord(self.source) >> 8,
-		# 	ord(self.source) & 0xFF,
-		# 	self.next_protocol >> 8,
-		# 	self.next_protocol & 0xFF,
-		# 	]) + self.payload
+		return self.destination + self.source + self.next_protocol + self.payload + self.checksum
 
 	def payload_to_binary(self):
 		'''
@@ -52,7 +48,6 @@ def encode_message(ip_bytearray):
 	'''
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
-	print("in encode mac")
 	mac_obj = Mac("A", "B", '1', ip_bytearray)
 	return mac_obj.create_message()
 
@@ -62,11 +57,11 @@ def decode_message(mac_bytearray):
 	verifies that the payload has been properly transmitted,
 	and outputs the verified mac object
 	'''
-	print("in decode mac")
 	destination = mac_bytearray[0:1]
 	source = mac_bytearray[1:2]
 	next_protocol = mac_bytearray[2:3]
-	payload = mac_bytearray[3:]
+	payload = mac_bytearray[3:len(mac_bytearray) - 2]
+	checksum = mac_bytearray[-2:]
 
 	return Mac(destination, source, next_protocol, payload)
 

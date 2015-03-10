@@ -8,11 +8,9 @@ def byteArrayToInt(data):
     return val
 
 def encode_udp(udp_obj):
-    print("in encode udp")
     return udp_obj.ip_header.serialize()
 
 def decode_udp(mac_obj):
-    print("in decode udp")
     ip_header = IPHeader()
     ip_header.parseFields(mac_obj)
 
@@ -53,20 +51,6 @@ class IPHeader(object):
 
     def serialize(self):
         packet = self._sourceAddress + self._destinationAddress + self._nextProtocol + self._payloadLength + self._payload
-        # bytearray([
-        #     (self._sourceAddress >> 24) & 0xFF,
-        #     (self._sourceAddress >> 16) & 0xFF,
-        #     (self._sourceAddress >> 8) & 0xFF,
-        #     self._sourceAddress & 0xFF,
-        #     (self._destinationAddress >> 24) & 0xFF,
-        #     (self._destinationAddress >> 16) & 0xFF,
-        #     (self._destinationAddress >> 8) & 0xFF,
-        #     self._destinationAddress & 0xFF,
-        #     0x00,
-        #     self._nextProtocol & 0xFF,
-        #     (self._payloadLength >> 8) & 0xFF,
-        #     self._payloadLength & 0xFF
-        # ]) + self._payload
         return packet
 
     def parseFields(self, mac_obj):
@@ -76,7 +60,6 @@ class IPHeader(object):
         self._nextProtocol = mac_obj.payload[5] #data[9]
         self._payloadLength = byteArrayToInt(mac_obj.payload[5:]) #byteArrayToInt(data[10:12])
         self._payload = mac_obj.payload[5:]
-        print("ip payload is " + str(self._payload))
 
 class UDPHeader(object):
     def __init__(self):
@@ -105,17 +88,6 @@ class UDPHeader(object):
             Serialize the stored fields into a bytearray packet
             to be passed down the stack
         '''
-        #packet = 
-        # bytearray([
-        #     self._sourcePort >> 8,
-        #     self._sourcePort & 0xFF,
-        #     self._destinationPort >> 8,
-        #     self._destinationPort & 0xFF,
-        #     self._length >> 8,
-        #     self._length & 0xFF,
-        #     self._checksum >> 8,
-        #     self._checksum & 0xFF
-        #     ]) + self._payload
         return self._sourcePort + self._destinationPort + self._length + self._checksum + self._payload
 
     def parseFields(self, data):
