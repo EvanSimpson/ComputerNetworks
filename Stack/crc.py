@@ -16,9 +16,9 @@ def crc(data_ba,key='101010101'):
     y = hex(int(y,2))
     y = y[2:]
     y = '0'*(2 - len(y)) + y
-    return bytearray(y)
+    return bytearray(y, encoding="UTF-8")
 
 
 
 if __name__ == '__main__':
-     print crc(bytearray('abcdefgh'))
+    print(crc(bytearray('abcdefgh', encoding="UTF-8")))
