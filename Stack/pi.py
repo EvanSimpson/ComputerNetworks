@@ -44,11 +44,31 @@ def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = .0025
 
 
 def receive(drpin=23):
+    dur = .0025
     prepare_pin(pin)
     times = []
     def cbf(channel):
         times.append(time.time())
     GPIO.add_event_detect(chanel,GPIO.BOTH,callback = cbf)
-    if time.time > times[-1] + .0025*20:
-        yield times
-        times = []
+    while(True):
+        if time.time > times[-1] + dur*20:
+            yield process(times)
+            times = []
+
+def process(times):
+    bin = ""
+    dts = [x - y for (x,y) in zip(times[1:],times[:-1])]
+    for i in range(len(dts)):
+        if i%2:
+            if dt[i]<dur*2:
+                bin = bin + '1'
+            else:
+                bin = bin + '111'
+        else:
+            if dt[i]<dur*2:
+                bin = bin + '0'
+            elif dt[i]<dur*5:
+                bin = bin + '000'
+            else:
+                bin = bin + '0000000'
+    return bin
