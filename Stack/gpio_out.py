@@ -1,7 +1,7 @@
-from pi_layer import *
+from pi import *
 
 def gpio_out():
-	while(True):
+	while True:
 		text_input = input()
 		if text_input:
 			transmit(text_input)

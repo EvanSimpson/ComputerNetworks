@@ -1,11 +1,14 @@
-from pi_layer import *
+#from pi import *
+import sys
+import fileinput
 
 def gpio_in():
-	while(True):
-		data = receive()
-		if data:
-			print(data)
-
+	while True:
+		try:
+			data = input()
+			print("THE DATA IS " + data)
+		except EOFError:
+			pass
 
 if __name__=="__main__":
 	gpio_in()

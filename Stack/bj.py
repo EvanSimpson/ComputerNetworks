@@ -1,7 +1,7 @@
 from datalink import Mac, encode_message, decode_message
 from physical import physical_down, physical_up
 from UDP import UDP, UDPHeader, encode_udp, decode_udp
-from pi_layer import transmit, receive
+from pi import transmit, receive
 
 class BJ_Stack():
 	def __init__(self, bjs):
