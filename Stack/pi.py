@@ -21,7 +21,7 @@ def read_pin(pin):
 	return GPIO.input(pin)
 
 def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = .0025):
-	prepare_pins(dtpin,ctpin,crpin,drpin)
+	prepare_pins()
 	counter = 0
 	while(True):
 		busy = read_pin(crpin)
@@ -45,7 +45,7 @@ def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = .0025
 
 def receive(drpin=23):
     dur = .0025
-    prepare_pin(pin)
+    prepare_pins()
     times = []
     def cbf(channel):
         times.append(time.time())
@@ -72,3 +72,7 @@ def process(times):
             else:
                 bin = bin + '0000000'
     return bin
+
+if __name__ == "__main__":
+    data = receive()
+    print(next(data))
