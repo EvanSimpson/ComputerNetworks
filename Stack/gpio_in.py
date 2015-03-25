@@ -1,12 +1,14 @@
 #from pi import *
 import sys
-import fileinput
+import subprocess
 
 def gpio_in():
 	while True:
 		try:
 			data = input()
-			print("THE DATA IS " + data)
+			print(data)
+			if data != '':
+				subprocess.call(["python3", "new_app.py"])
 		except EOFError:
 			pass
 
