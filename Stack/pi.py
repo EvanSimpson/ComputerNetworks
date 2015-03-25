@@ -1,4 +1,4 @@
-import Rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 
 def prepare_pins(dtpin = 17, ctpin = 18, crpin = 22, drpin = 23):
