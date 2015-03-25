@@ -1,8 +1,3 @@
-from datalink import Mac, encode_message, decode_message
-from physical import physical_down, physical_up
-from UDP import UDP, UDPHeader, encode_udp, decode_udp
-from pi import transmit, receive
-
 class BJ_Stack():
 	def __init__(self, bjs):
 		self._descend = tuple(bjs)
@@ -62,16 +57,4 @@ if __name__ == "__main__":
 	'''
 		main function to transmit up/down the stack
 	'''
-
-	udp_header = UDPHeader()
-	udp_header.setFields('01', '02', bytearray('HANDLES LoWERCASE', encoding='UTF-8'))
-	udp_obj = UDP(udp_header, "CA", "BD")
-
-	physical_layer = BJ(transmit, receive)
-	morse_layer = BJ(physical_down, physical_up)
-	mac_layer = BJ(encode_message, decode_message)
-	udp_layer = BJ(encode_udp, decode_udp)
-
-	stack = BJ_Stack([udp_layer, mac_layer, morse_layer, physical_layer])
-
-	print(stack.ascend(stack.descend(udp_obj)))
+	pass

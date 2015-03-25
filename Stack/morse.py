@@ -1,9 +1,9 @@
 from codes import *
 
-def physical_up(input):
+def morse_up(input):
   return bin2bytearray(input)
 
-def physical_down(input):
+def morse_down(input):
   return bytearray2bin(input)
 
 def bytearray2bin(bytearray_message):
