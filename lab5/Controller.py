@@ -1,11 +1,12 @@
 import sys
 import CN_Sockets
 import Model
-import view as View
+import View
 
 class Hangman(object):
 
-    def __init__(self,IP="127.0.0.1",port=5280):
+    # IP and port need to be assigned in the super
+    def __init__(self,IP,port):
         self.socket, self.AF_INET, self.SOCK_DGRAM, self.timeout = CN_Sockets.socket, CN_Sockets.AF_INET, CN_Sockets.SOCK_DGRAM, CN_Sockets.timeout
         self.ownIP = IP
         self.ownPort = port
@@ -176,5 +177,7 @@ class Hangman(object):
                 break
 
 if __name__ == "__main__":
-   host = Hangman()
+   IP = 'localhost'
+   port = 5280
+   host = Hangman(IP, port)
    host.play()
