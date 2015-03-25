@@ -2,11 +2,14 @@ import RPi.GPIO as GPIO
 import time
 
 def prepare_pins(dtpin = 17, ctpin = 18, crpin = 22, drpin = 23):
-	GPIO.setmode(GPIO.bcm)
+	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(dtpin,GPIO.OUT)
 	GPIO.setup(ctpin,GPIO.OUT)
 	GPIO.setup(crpin,GPIO.IN)
 	GPIO.setup(drpin,GPIO.IN)
+
+def kill():
+        GPIO.cleanup()
 
 def turn_high(pin):
 	GPIO.output(pin,GPIO.HIGH)
@@ -20,7 +23,7 @@ def delay(t):
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = .0025):
+def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = 1):
 	prepare_pins()
 	counter = 0
 	while(True):
@@ -43,34 +46,42 @@ def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = .0025
 	turn_low(ctpin)
 
 
-def receive(drpin=23):
-    dur = .0025
+def receive(drpin=23,crpin = 22):
     prepare_pins()
     times = []
     def cbf(channel):
         times.append(time.time())
-    GPIO.add_event_detect(chanel,GPIO.BOTH,callback = cbf)
+    def cbf2(channel):
+        times.append(time.time())
+        if not(read_pin(22)):
+             times.append(-1)
+    GPIO.add_event_detect(crpin,GPIO.BOTH,callback = cbf2)
+    GPIO.add_event_detect(drpin,GPIO.BOTH,callback = cbf)
     while(True):
-        if time.time > times[-1] + dur*20:
-            yield process(times)
+        if (len(times)>0) and (times[-1]==-1):
+            yield process(times[1:-1])
             times = []
 
 def process(times):
     bin = ""
+    buffer = []
+    dur = .001
     dts = [x - y for (x,y) in zip(times[1:],times[:-1])]
-    for i in range(len(dts)):
-        if i%2:
-            if dt[i]<dur*2:
-                bin = bin + '1'
-            else:
-                bin = bin + '111'
+    flag = False
+    for i in range(len(dts)):  
+        if flag:
+           if dts[i]<dur*2:
+               bin = bin + '1'
+           else:
+               bin = bin + '111'
         else:
-            if dt[i]<dur*2:
-                bin = bin + '0'
-            elif dt[i]<dur*5:
-                bin = bin + '000'
-            else:
-                bin = bin + '0000000'
+           if dts[i]<dur*2:
+               bin = bin + '0'
+           elif dts[i]<dur*5:
+               bin = bin + '000'
+           else:
+               bin = bin + '0000000'
+        flag = not(flag)
     return bin
 
 if __name__ == "__main__":
