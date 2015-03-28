@@ -6,6 +6,7 @@ from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
 #from pi import transmit, receive
 
+
 class Stack():
 
 	def __init__(self):
@@ -19,6 +20,13 @@ class Stack():
 		morse_layer = BJ(morse_down, morse_up)
 		mac_layer = BJ(encode_message, decode_message)
 		udp_layer = BJ(encode_udp, decode_udp)
+
+		self.joesocket_commands = {
+			"bind": self.socket_bind,
+			"close": self.socekt_close,
+			"sendto": self.socket_sendto,
+			"recvfrom": self.socket_recvfrom
+		}
 
 		self.stack = BJ_Stack([udp_layer, mac_layer, morse_layer])
 
@@ -80,14 +88,35 @@ class Stack():
 	def handle_input_from_client(message, client_address):
 		parsed_message = json.loads(message)
 		
-		if parsed_message['port'] not in self.active_game_ports:
-			self.add_new_client(parsed_message['port'], self.active_game_ports)
+		if parsed_message['params']['port'] not in self.active_game_ports:
+			self.add_new_client(parsed_message['port'], client_address)
+		
+		parsed_message['params']['address'] = client_address
+		self.joesocket_commands[parsed_message['command']](**parsed_message['params'])
 
-		#check for different commands and then do the things they say 
-
+	def fulfill_action_by_command(command_name):
+		case:
 
 	def add_new_client(self, port_letter, client_address):
 		self.active_game_ports[port_letter] = client_address
+
+	def socket_bind(self, port):
+		self.send_acknowledgement(self.active_game_ports[port])
+
+	def socket_close(self, port):
+		if port in active_game_ports:
+			active_game_ports.pop(port)
+		self.send_acknowledgement(self.active_game_ports[port])
+
+	def socket_sendto(self, port, message):
+		#this means we're getting a message from the app to pass around the stack, yay!
+
+	def socket_recvfrom(self):
+		pass
+
+	def send_acknowledgement(self, client_address):
+		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
+		self.game_server_socket.sendto(return_message, client_address)
 
 if __name__ == "__main__":
 	stack = Stack()
