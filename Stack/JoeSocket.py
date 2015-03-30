@@ -5,13 +5,21 @@ localhost = '127.0.0.1'
 stack_port = 5000
 
 class JoeSocket(Object):
-    def __init__(self, family=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
+    def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
         self._family = family
-        self._type = type
+        self._type = n_type
         self._proto = proto
+        self._closed = False
         self._stack_address = (localhost, stack_port)
         # TODO initialize socket to stack somewhere
         # TODO get port from port authority at some point
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        if not self._closed:
+            self.close()
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
@@ -67,6 +75,8 @@ class JoeSocket(Object):
                 continue
         except:
             # TODO check error to make sure socket is still open
+        self._closed = True
+        self._pysock.close()
 
     def recvfrom(self, buffsize, flags):
         # Receive data from the socket. The return value is a pair
@@ -81,11 +91,11 @@ class JoeSocket(Object):
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recv(1024)
-            response = from_stack.decode("UTF-8")
+            response = json.loads(from_stack.decode("UTF-8"))
             if response.error != 0:
                 #TODO verify the from_stack data here
             else:
-                return response.data
+                return response.data, response.address
         except:
             #TODO throw the same error that the pysocket would have thrown
 
@@ -100,7 +110,6 @@ class JoeSocket(Object):
         else:
             sent = 0
             if len(send_bytes):
-                #TODO serialize string and JoeSocket info before sending
                 payload = bytearray(json.dumps({"command":"sendto", "params": {"address": self._address, "destination": address, "data": send_bytes}}))
                 sent = self._pysock.sendto(payload)
                 while 1:
