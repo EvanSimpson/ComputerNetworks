@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 
 def prepare_pins(dtpin = 17, ctpin = 18, crpin = 22, drpin = 23):
 	GPIO.setmode(GPIO.BCM)
@@ -46,7 +47,8 @@ def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = 1):
 	turn_low(ctpin)
 
 
-def receive(drpin=23,crpin = 22):
+def receive(lock, drpin=23,crpin = 22):
+    global received_packet
     prepare_pins()
     times = []
     def cbf(channel):
@@ -59,7 +61,13 @@ def receive(drpin=23,crpin = 22):
     GPIO.add_event_detect(drpin,GPIO.BOTH,callback = cbf)
     while(True):
         if (len(times)>0) and (times[-1]==-1):
-            yield process(times[1:-1])
+            lock.aquire(blocking=True)
+            try:
+                received_packet = process(times[1:-1])
+            finally:
+                lock.release()
+            #yield process(times[1:-1])
+
             times = []
 
 def process(times):
