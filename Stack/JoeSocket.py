@@ -115,7 +115,7 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
-            payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes}}), encoding="utf-8")
+            payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
             sent = self._pysock.sendto(payload, self._stack_address)
         else:
             #error
@@ -123,4 +123,4 @@ class JoeSocket(object):
 
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("HI TEAM LETS TEST YAY BABYSTEPS", ("A", "01"))
+    sock.sendto(bytearray("HI TEAM LETS TEST YAY BABYSTEPS", encoding="utf-8"), ("A", "01"))
