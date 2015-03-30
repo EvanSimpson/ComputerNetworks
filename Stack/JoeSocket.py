@@ -5,13 +5,21 @@ localhost = '127.0.0.1'
 stack_port = 5000
 
 class JoeSocket(Object):
-    def __init__(self, family=socket.AF_INET, type=socket.SOCK_STREAM, proto=0):
+    def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
         self._family = family
-        self._type = type
+        self._type = n_type
         self._proto = proto
+        self._closed = False
         self._stack_address = (localhost, stack_port)
         # TODO initialize socket to stack somewhere
         # TODO get port from port authority at some point
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        if not self._closed:
+            self.close()
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
@@ -67,6 +75,8 @@ class JoeSocket(Object):
                 continue
         except:
             # TODO check error to make sure socket is still open
+        self._closed = True
+        self._pysock.close()
 
     def recvfrom(self, buffsize, flags):
         # Receive data from the socket. The return value is a pair
