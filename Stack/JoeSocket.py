@@ -1,8 +1,10 @@
 import json
 import socket
+import generate_port
 
 localhost = '127.0.0.1'
 stack_port = 5000
+olinhost = 'A'
 
 class JoeSocket(Object):
     def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
@@ -11,7 +13,6 @@ class JoeSocket(Object):
         self._proto = proto
         self._closed = False
         self._stack_address = (localhost, stack_port)
-        # TODO initialize socket to stack somewhere
         # TODO get port from port authority at some point
 
     def __enter__(self):
@@ -21,11 +22,15 @@ class JoeSocket(Object):
         if not self._closed:
             self.close()
 
+    def _initialize_socket(self):
+        self._pysock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._address = (olinhost, generate_port.generate_port_num())
+
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
         # (The format of address depends on the address family — see above.)
         if not self._pysock:
-            # TODO open a new socket to the Stack
+            self._initialize_socket()
         try:
             payload = bytearray(json.dumps({'command': 'bind', 'params': {'address': self._address}}))
             sent = self._pysock.sendto(payload)
@@ -86,16 +91,14 @@ class JoeSocket(Object):
         # argument flags; it defaults to zero. (The format of address depends
         # on the address family — see above.)
         if not self._pysock:
-            # TODO open the socket to Stack
+            self._initialize_socket()
         try:
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
-            from_stack, stack_address = self._pysock.recv(1024)
+            from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
             response = json.loads(from_stack.decode("UTF-8"))
-            if response.error != 0:
-                #TODO verify the from_stack data here
             else:
-                return response.data, response.address
+                return (response.payload, response.address)
         except:
             #TODO throw the same error that the pysocket would have thrown
 
@@ -105,8 +108,8 @@ class JoeSocket(Object):
         # The optional flags argument has the same meaning as for recv() above.
         # Return the number of bytes sent. (The format of address depends on the
         # address family — see above.)
-        if not self._pysock:
-            # ERROR
+        if self._pysock:
+            self._initialize_socket()
         else:
             sent = 0
             if len(send_bytes):
@@ -120,3 +123,7 @@ class JoeSocket(Object):
                         continue
             else:
                 #error
+
+if __name__ == "__main__":
+    sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(bytearray("hello"), ("A", "01"))
