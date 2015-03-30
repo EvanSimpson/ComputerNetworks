@@ -89,7 +89,7 @@ class JoeSocket(Object):
         except:
             #TODO throw the same error that the pysocket would have thrown
 
-    def sendto(self, bytes, address):
+    def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
         # remote socket, since the destination socket is specified by address.
         # The optional flags argument has the same meaning as for recv() above.
@@ -99,14 +99,14 @@ class JoeSocket(Object):
             # ERROR
         else:
             sent = 0
-            if len(string):
+            if len(send_bytes):
                 #TODO serialize string and JoeSocket info before sending
-                sent = self._pysock.sendto(string, self._stack_address)
-            if sent==len(string):
+                payload = bytearray(json.dumps({"command":"sendto", "params": {"address": self._address, "destination": address, "data": send_bytes}}))
+                sent = self._pysock.sendto(payload)
                 while 1:
                     try:
                         from_stack, stack_address = self._pysock.recvfrom(1024)
-                        return sent
+                        return len(payload)
                     except:
                         continue
             else:
