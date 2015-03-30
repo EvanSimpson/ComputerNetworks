@@ -1,3 +1,4 @@
+import sys
 import socket
 import json
 from bj import *
@@ -62,8 +63,10 @@ class Stack():
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
 			self.handle_input_from_client(input_from_client, client_address)
-		except e:
-			print(e)
+		except KeyboardInterrupt:
+			# continue
+			self.game_server_socket.close()
+			sys.exit()
 
 	#handling inputs
 
@@ -105,9 +108,8 @@ class Stack():
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def joesocket_sendto(self, source_address, destination_address, data):
-		print(data)
 		self.send_message_over_gpio(source_address, destination_address, data)
-		self.send_acknowledgement(self.active_game_ports[port])
+		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
@@ -115,15 +117,15 @@ class Stack():
 
 	#sending data over gpio based on input from joesocket
 
-	# def send_message_over_gpio(self, source_address, destination_address, message_to_send):
-	# 	udp_obj = self.initialize_udp(message_to_send, source_address, destination_address)
-	# 	to_transmit_string = self.stack.descend(udp_obj)
-	# 	to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
-	# 	self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
+	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
+		udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
+		to_transmit_string = self.stack.descend(udp_obj)
+		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
+		# self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
-		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding='UTF-8'))
+		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding="UTF-8"))
 		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ class UDP(object):
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
             "Source Port: " + str(self.udp_header._sourcePort) + "," \
-            "UDP Header Payload Length: " + str(self.udp_header._length) + "," \
+            "UDP Header Payload Length: " + str(len(self.udp_header._payload)) + "," \
             "UDP Header Payload: " + str(self.udp_header._payload) + "," \
             "Source Address: " + str(self.ip_header._sourceAddress) + "," \
             "Destination Address: " + str(self.ip_header._destinationAddress) + "," \
@@ -74,8 +74,8 @@ class UDPHeader(object):
 
     def setFields(self, sPort, dPort, payload):
         '''
-            sPort is expected to be an integer
-            dPort is expected to be an integer
+            sPort is expected to be a string
+            dPort is expected to be a string
             paylaod is expected to be a bytearray
         '''
         self._sourcePort = bytearray(sPort, encoding="UTF-8")
