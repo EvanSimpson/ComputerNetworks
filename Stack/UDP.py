@@ -15,24 +15,30 @@ def decode_udp(mac_obj):
     ip_header = IPHeader()
     ip_header.parseFields(mac_obj)
 
-    packetObj = UDPHeader()
-    packetObj.parseFields(ip_header._payload)
+    udp_header = UDPHeader()
+    udp_header.parseFields(ip_header._payload)
 
-    return packetObj._payload
+    udp_obj = UDP(udp_header, ip_header=ip_header)
+
+    return udp_obj
 
 class UDP(object):
 
-    def __init__(self, udp_header, srcAddr, destAddr):
+    def __init__(self, udp_header, srcAddr=False, destAddr=False, ip_header=False):
         self.udp_header = udp_header
         self.packet = self.udp_header.serialize()
 
-        self.ip_header = IPHeader()
-        self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
+        if not srcAddr and not destAddr:
+            self.ip_header = ip_header
+
+        elif not ip_header:
+            self.ip_header = IPHeader()
+            self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
 
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
             "Source Port: " + str(self.udp_header._sourcePort) + "," \
-            "UDP Header Payload Length: " + str(self.udp_header._length) + "," \
+            "UDP Header Payload Length: " + str(len(self.udp_header._payload)) + "," \
             "UDP Header Payload: " + str(self.udp_header._payload) + "," \
             "Source Address: " + str(self.ip_header._sourceAddress) + "," \
             "Destination Address: " + str(self.ip_header._destinationAddress) + "," \
@@ -68,8 +74,8 @@ class UDPHeader(object):
 
     def setFields(self, sPort, dPort, payload):
         '''
-            sPort is expected to be an integer
-            dPort is expected to be an integer
+            sPort is expected to be a string
+            dPort is expected to be a string
             paylaod is expected to be a bytearray
         '''
         self._sourcePort = bytearray(sPort, encoding="UTF-8")
