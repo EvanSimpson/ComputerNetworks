@@ -123,4 +123,4 @@ class JoeSocket(object):
 
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("hello", ("A", "01"))
+    sock.sendto("HI TEAM LETS TEST YAY BABYSTEPS", ("A", "01"))
