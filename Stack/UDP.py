@@ -15,19 +15,25 @@ def decode_udp(mac_obj):
     ip_header = IPHeader()
     ip_header.parseFields(mac_obj)
 
-    packetObj = UDPHeader()
-    packetObj.parseFields(ip_header._payload)
+    udp_header = UDPHeader()
+    udp_header.parseFields(ip_header._payload)
 
-    return packetObj._payload
+    udp_obj = UDP(udp_header, ip_header=ip_header)
+
+    return udp_obj
 
 class UDP(object):
 
-    def __init__(self, udp_header, srcAddr, destAddr):
+    def __init__(self, udp_header, srcAddr=False, destAddr=False, ip_header=False):
         self.udp_header = udp_header
         self.packet = self.udp_header.serialize()
 
-        self.ip_header = IPHeader()
-        self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
+        if not srcAddr and not destAddr:
+            self.ip_header = ip_header
+
+        else if not ip_header:
+            self.ip_header = IPHeader()
+            self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
 
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \

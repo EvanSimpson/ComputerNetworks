@@ -25,7 +25,7 @@ class Stack():
 
 		self.joesocket_commands = {
 			"bind": self.joesocket_bind,
-			"close": self.joesocekt_close,
+			"close": self.joesocket_close,
 			"sendto": self.joesocket_sendto,
 		}
 
@@ -61,19 +61,19 @@ class Stack():
 	def listen_for_games(self):
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
-			handle_client_input(input_from_client, client_address)
+			handle_input_from_client(input_from_client, client_address)
 		except:
 			continue
 
 	#handling inputs 
 	
-	def handle_input_from_client(message, client_address):
+	def handle_input_from_client(message_bytearray, client_address):
+
 		parsed_message = json.loads(message)
 		
-		if parsed_message['params']['port'] not in self.active_game_ports:
+		if parsed_message['params']['address'][1] not in self.active_game_ports:
 			self.add_new_client(parsed_message['port'], client_address)
-		
-		parsed_message['params']['address'] = client_address
+
 		self.joesocket_commands[parsed_message['command']](**parsed_message['params'])
 
 
@@ -81,8 +81,17 @@ class Stack():
 		self.active_game_ports[port_letter] = client_address
 
 	def handle_input_from_gpio(self, message_received):
-		return self.stack.ascend(message_received)
+		udp_input = self.stack.ascend(message_received)
+		destination_port = udp_input.udp_header._destinationPort 
+		if destination_port in self.active_game_ports:
+			destination_address = self.active_game_ports[destination_port]
 
+			payload = udp_input.udp_header._payload
+			source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
+			
+			to_send = json.dumps([{'payload': payload, 'address': source}])
+			game_server_socket.sendto(to_send, destination_address)
+	
 	# functions called on joesocket commands
 
 	def joesocket_bind(self, address):
@@ -95,8 +104,8 @@ class Stack():
 			active_game_ports.pop(port)
 		self.send_acknowledgement(self.active_game_ports[port])
 
-	def joesocket_sendto(self, port, message):
-		self.send_message_over_gpio(message)
+	def joesocket_sendto(self, source_address, destination_address, message_to_send):
+		self.send_message_over_gpio(source_address, destination_address, message_to_send)
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def send_acknowledgement(self, client_address):
@@ -114,7 +123,7 @@ class Stack():
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
 		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding='UTF-8'))
-		return UDP(udp_header, source_address[0], destination_address[0])
+		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
 
 if __name__ == "__main__":
 	stack = Stack()
