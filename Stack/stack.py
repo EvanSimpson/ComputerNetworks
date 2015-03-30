@@ -85,16 +85,18 @@ class Stack():
 
 	# functions called on joesocket commands
 
-	def joesocket_bind(self, port):
+	def joesocket_bind(self, address):
+		port = address[1]
 		self.send_acknowledgement(self.active_game_ports[port])
 
-	def joesocket_close(self, port):
+	def joesocket_close(self, address):
+		port = address[1]
 		if port in active_game_ports:
 			active_game_ports.pop(port)
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def joesocket_sendto(self, port, message):
-		self.send_data_over_gpio(message)
+		self.send_message_over_gpio(message)
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def send_acknowledgement(self, client_address):
@@ -103,17 +105,18 @@ class Stack():
 
 	#sending data over gpio based on input from joesocket
 
-	def send_data_over_gpio(self, message_to_send):
-		udp_obj = self.initialize_udp(message_to_send)
+	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
+		udp_obj = self.initialize_udp(message_to_send, source_address, destination_address)
 		to_transmit_string = self.stack.descend(udp_obj)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
 
-	def initialize_udp(self, message_to_send):
+	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
-		udp_header.setFields('01', '02', bytearray(message_to_send, encoding='UTF-8'))
-		return UDP(udp_header, "CA", "BD")
+		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding='UTF-8'))
+		return UDP(udp_header, source_address[0], destination_address[0])
 
 if __name__ == "__main__":
 	stack = Stack()
+	stack.send_message_over_gpio("hello world")
 	stack.listen_for_input()
