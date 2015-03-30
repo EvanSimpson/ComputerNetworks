@@ -81,11 +81,11 @@ class JoeSocket(Object):
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recv(1024)
-            response = from_stack.decode("UTF-8")
+            response = json.loads(from_stack.decode("UTF-8"))
             if response.error != 0:
                 #TODO verify the from_stack data here
             else:
-                return response.data
+                return response.data, response.address
         except:
             #TODO throw the same error that the pysocket would have thrown
 
@@ -100,7 +100,6 @@ class JoeSocket(Object):
         else:
             sent = 0
             if len(send_bytes):
-                #TODO serialize string and JoeSocket info before sending
                 payload = bytearray(json.dumps({"command":"sendto", "params": {"address": self._address, "destination": address, "data": send_bytes}}))
                 sent = self._pysock.sendto(payload)
                 while 1:
