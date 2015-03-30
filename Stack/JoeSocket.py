@@ -36,7 +36,7 @@ class JoeSocket(object):
         try:
             self._address = address
             payload = bytearray(json.dumps({'command': 'bind', 'params': {'source_address': self._address}}), encoding="UTF-8")
-            sent = self._pysock.sendto(payload, (localhost, stack_port))
+            sent = self._pysock.sendto(payload, self._stack_address)
             while 1:
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
@@ -72,14 +72,14 @@ class JoeSocket(object):
             # TODO Error - no socket to close
             pass
         try:
-            payload = bytearray(json.dumps({"command":"close", "params": {"source_address": {self._address}}}))
-            sent = self._pysock.sendto(payload)
+            payload = bytearray(json.dumps({"command":"close", "params": {"source_address": self._address}}), encoding="UTF-8")
+            sent = self._pysock.sendto(payload, self._stack_address)
             while 1:
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
                     response = json.loads(from_stack.decode("UTF-8"))
-                    if response.error != 0:
-                        print(response.error)
+                    if response["Error"] != 0:
+                        print(response["Error"])
                         # TODO error handling here
                     else:
                         return 0
@@ -129,3 +129,4 @@ class JoeSocket(object):
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("CC", "19"))
+    sock.close()

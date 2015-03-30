@@ -100,11 +100,11 @@ class Stack():
 		port = source_address[1]
 		self.send_acknowledgement(self.active_game_ports[port])
 
-	def joesocket_close(self, address):
-		port = address[1]
-		if port in active_game_ports:
-			active_game_ports.pop(port)
-		self.send_acknowledgement(self.active_game_ports[port])
+	def joesocket_close(self, source_address):
+		port = source_address[1] 
+		if port in self.active_game_ports:
+			socket_port = self.active_game_ports.pop(port)	
+		self.send_acknowledgement(socket_port)
 
 	def joesocket_sendto(self, source_address, destination_address, data):
 		self.send_message_over_gpio(source_address, destination_address, data)
