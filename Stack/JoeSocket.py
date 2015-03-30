@@ -34,23 +34,24 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         try:
-            payload = bytearray(json.dumps({'command': 'bind', 'params': {'source_address': self._address}}))
-            sent = self._pysock.sendto(payload)
+            self._address = address
+            payload = bytearray(json.dumps({'command': 'bind', 'params': {'source_address': self._address}}), encoding="UTF-8")
+            sent = self._pysock.sendto(payload, (localhost, stack_port))
             while 1:
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response.error != 0:
                         # TODO error handling here
-                        pass
+                        print(response.error)
                     else:
                         return 0
-                except:
+                except e:
                     # TODO check error to make sure socket is still open
-                    continue
-        except:
+                    print(e)
+        except e:
+            print(e)
             # TODO error handling here
-            pass
 
     def close(self):
         # Mark the socket closed. The underlying system resource (e.g. a file
@@ -74,16 +75,20 @@ class JoeSocket(object):
             payload = bytearray(json.dumps({"command":"close", "params": {"source_address": {self._address}}}))
             sent = self._pysock.sendto(payload)
             while 1:
-                from_stack, stack_address = self._pysock.recvfrom(1024)
-                response = json.loads(from_stack.decode("UTF-8"))
-                if response.error != 0:
-                    # TODO error handling here
-                    pass
-                else:
-                    return 0
-        except:
+                try:
+                    from_stack, stack_address = self._pysock.recvfrom(1024)
+                    response = json.loads(from_stack.decode("UTF-8"))
+                    if response.error != 0:
+                        print(response.error)
+                        # TODO error handling here
+                    else:
+                        return 0
+                except e:
+                    print(e)
+        except e:
             # TODO check error to make sure socket is still open
-            pass
+            print(e)
+
         self._closed = True
         self._pysock.close()
 
@@ -123,4 +128,4 @@ class JoeSocket(object):
 
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(bytearray("HI TEAM LETS TEST YAY BABYSTEPS", encoding="utf-8"), ("A", "01"))
+    sock.bind(("CC", "19"))

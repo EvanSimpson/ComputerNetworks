@@ -62,16 +62,14 @@ class Stack():
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
 			self.handle_input_from_client(input_from_client, client_address)
-		except:
-			# continue
-			pass
+		except e:
+			print(e)
 
 	#handling inputs
 
 	def handle_input_from_client(self, message_bytearray, client_address):
 
 		parsed_message = json.loads(message_bytearray.decode("UTF-8"))
-
 		if parsed_message['params']['source_address'][1] not in self.active_game_ports:
 			self.add_new_client(parsed_message['params']['source_address'][1], client_address)
 
@@ -95,8 +93,9 @@ class Stack():
 
 	# functions called on joesocket commands
 
-	def joesocket_bind(self, address):
-		port = address[1]
+	def joesocket_bind(self, source_address):
+		port = source_address[1]
+		print(self.active_game_ports[port])
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def joesocket_close(self, address):
