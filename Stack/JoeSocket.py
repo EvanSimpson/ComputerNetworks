@@ -6,13 +6,15 @@ localhost = '127.0.0.1'
 stack_port = 5000
 olinhost = 'A'
 
-class JoeSocket(Object):
+class JoeSocket(object):
     def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
         self._family = family
         self._type = n_type
         self._proto = proto
         self._closed = False
         self._stack_address = (localhost, stack_port)
+        self._pysock = False
+        self._address = ()
         # TODO get port from port authority at some point
 
     def __enter__(self):
@@ -24,7 +26,7 @@ class JoeSocket(Object):
 
     def _initialize_socket(self):
         self._pysock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._address = (olinhost, generate_port.generate_port_num())
+        self._address = (olinhost, "01")
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
@@ -32,7 +34,7 @@ class JoeSocket(Object):
         if not self._pysock:
             self._initialize_socket()
         try:
-            payload = bytearray(json.dumps({'command': 'bind', 'params': {'address': self._address}}))
+            payload = bytearray(json.dumps({'command': 'bind', 'params': {'source_address': self._address}}))
             sent = self._pysock.sendto(payload)
             while 1:
                 try:
@@ -40,13 +42,15 @@ class JoeSocket(Object):
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response.error != 0:
                         # TODO error handling here
-                    else
+                        pass
+                    else:
                         return 0
                 except:
                     # TODO check error to make sure socket is still open
                     continue
         except:
             # TODO error handling here
+            pass
 
     def close(self):
         # Mark the socket closed. The underlying system resource (e.g. a file
@@ -65,21 +69,21 @@ class JoeSocket(Object):
         # close().
         if not self._pysock:
             # TODO Error - no socket to close
+            pass
         try:
-            payload = bytearray(json.dumps({"command":"close", "params": {"address": {self._address}}}))
+            payload = bytearray(json.dumps({"command":"close", "params": {"source_address": {self._address}}}))
             sent = self._pysock.sendto(payload)
             while 1:
                 from_stack, stack_address = self._pysock.recvfrom(1024)
                 response = json.loads(from_stack.decode("UTF-8"))
                 if response.error != 0:
                     # TODO error handling here
-                else
+                    pass
+                else:
                     return 0
-            except:
-                # TODO check error to make sure socket is still open
-                continue
         except:
             # TODO check error to make sure socket is still open
+            pass
         self._closed = True
         self._pysock.close()
 
@@ -97,10 +101,10 @@ class JoeSocket(Object):
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
             response = json.loads(from_stack.decode("UTF-8"))
-            else:
-                return (response.payload, response.address)
+            return (response.payload, response.address)
         except:
             #TODO throw the same error that the pysocket would have thrown
+            pass
 
     def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
@@ -108,22 +112,15 @@ class JoeSocket(Object):
         # The optional flags argument has the same meaning as for recv() above.
         # Return the number of bytes sent. (The format of address depends on the
         # address family — see above.)
-        if self._pysock:
+        if not self._pysock:
             self._initialize_socket()
+        if len(send_bytes):
+            payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes}}), encoding="utf-8")
+            sent = self._pysock.sendto(payload, self._stack_address)
         else:
-            sent = 0
-            if len(send_bytes):
-                payload = bytearray(json.dumps({"command":"sendto", "params": {"address": self._address, "destination": address, "data": send_bytes}}))
-                sent = self._pysock.sendto(payload)
-                while 1:
-                    try:
-                        from_stack, stack_address = self._pysock.recvfrom(1024)
-                        return len(payload)
-                    except:
-                        continue
-            else:
-                #error
+            #error
+            pass
 
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(bytearray("hello"), ("A", "01"))
+    sock.sendto("hello", ("A", "01"))

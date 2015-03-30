@@ -31,7 +31,7 @@ class UDP(object):
         if not srcAddr and not destAddr:
             self.ip_header = ip_header
 
-        else if not ip_header:
+        elif not ip_header:
             self.ip_header = IPHeader()
             self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
 
