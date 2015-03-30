@@ -98,7 +98,6 @@ class Stack():
 
 	def joesocket_bind(self, source_address):
 		port = source_address[1]
-		print(self.active_game_ports[port])
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def joesocket_close(self, address):

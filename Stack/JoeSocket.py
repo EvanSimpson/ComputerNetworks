@@ -41,9 +41,9 @@ class JoeSocket(object):
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
                     response = json.loads(from_stack.decode("UTF-8"))
-                    if response.error != 0:
+                    if response["Error"] != 0:
                         # TODO error handling here
-                        print(response.error)
+                        print("Error: " + response["Error"])
                     else:
                         return 0
                 except e:
