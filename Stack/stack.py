@@ -5,7 +5,7 @@ from bj import *
 from UDP import UDP, UDPHeader, encode_udp, decode_udp
 from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
-# from pi import transmit, receive
+from pi import transmit, receive
 import threading
 
 lock = threading.Lock()
@@ -42,22 +42,22 @@ class Stack():
 	#listening out over joesocket and gpio
 
 	def listen_for_input(self):
-		#gpio_thread = self.listen_over_gpio()
+		gpio_thread = self.listen_over_gpio()
 		while True:
 
-			# lock.acquire(blocking=True)
-			# try:
-			# 	if (received_packet!=""):
-			# 		self.handle_input_from_gpio(received_packet)
-			# finally:
-			# 	lock.release()
+			lock.acquire(blocking=True)
+			try:
+				if (received_packet!=""):
+					self.handle_input_from_gpio(received_packet)
+			finally:
+				lock.release()
 
 			self.listen_for_games()
 
-	# def listen_over_gpio(self):
-	# 	gpio_thread = threading.Thread(target=receive, args=[lock], name="gpio_receive_thread")
-	# 	gpio_thread.start()
-	# 	return gpio_thread
+	def listen_over_gpio(self):
+		gpio_thread = threading.Thread(target=receive, args=[lock], name="gpio_receive_thread")
+		gpio_thread.start()
+		return gpio_thread
 
 	def listen_for_games(self):
 		try:
@@ -82,17 +82,17 @@ class Stack():
 	def add_new_client(self, port_letter, client_address):
 		self.active_game_ports[port_letter] = client_address
 
-	# def handle_input_from_gpio(self, message_received):
-	# 	udp_input = self.stack.ascend(message_received)
-	# 	destination_port = udp_input.udp_header._destinationPort
-	# 	if destination_port in self.active_game_ports:
-	# 		destination_address = self.active_game_ports[destination_port]
+	def handle_input_from_gpio(self, message_received):
+		udp_input = self.stack.ascend(message_received)
+		destination_port = udp_input.udp_header._destinationPort
+		if destination_port in self.active_game_ports:
+			destination_address = self.active_game_ports[destination_port]
 
-	# 		payload = udp_input.udp_header._payload
-	# 		source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
+			payload = udp_input.udp_header._payload
+			source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
 
-	# 		to_send = json.dumps([{'payload': payload, 'address': source}])
-	# 		game_server_socket.sendto(to_send, destination_address)
+			to_send = json.dumps([{'payload': payload, 'address': source}])
+			game_server_socket.sendto(to_send, destination_address)
 
 	# functions called on joesocket commands
 
@@ -129,5 +129,5 @@ class Stack():
 
 if __name__ == "__main__":
 	stack = Stack()
-	#stack.send_message_over_gpio("hello world")
+	stack.send_message_over_gpio("hello world")
 	stack.listen_for_input()
