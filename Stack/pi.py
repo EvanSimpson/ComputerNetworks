@@ -34,7 +34,7 @@ def transmit(data, data_transmit_pin=18, carrier_transmit_pin = 17, carrier_read
 		time.sleep(.1)
 	turn_high(carrier_transmit_pin)
 	for i in range(len(data)):
-		if data[i]==1:
+		if data[i]==1:
 			turn_high(data_transmit_pin)
 		else:
 			turn_low(data_transmit_pin)
