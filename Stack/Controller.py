@@ -1,5 +1,5 @@
 import sys
-import CN_Sockets
+import JoeSocket 
 import Model
 import View
 
@@ -7,7 +7,7 @@ class Hangman(object):
 
     # IP and port need to be assigned in the super
     def __init__(self,IP,port):
-        self.socket, self.AF_INET, self.SOCK_DGRAM, self.timeout = CN_Sockets.socket, CN_Sockets.AF_INET, CN_Sockets.SOCK_DGRAM, CN_Sockets.timeout
+        self.socket, self.AF_INET, self.SOCK_DGRAM, self.timeout = JoeSocket.JoeSocket, JoeSocket.AF_INET, JoeSocket.SOCK_DGRAM, JoeSocket.timeout
         self.ownIP = IP
         self.ownPort = port
         #self.view = view.view
@@ -70,6 +70,7 @@ class Hangman(object):
                     # Get input word
                     while True:
                         self.sock.bind((self.ownIP, self.ownPort))
+                        print(self.state)
                         self.sock.settimeout(2.0)
 
                         # Wait for client to connect
@@ -77,8 +78,8 @@ class Hangman(object):
                             try:
                                 input_from_client, clientAddress = sock.recvfrom(1024)
                                 client_message = input_from_client.decode("UTF-8")
-
-                                if client_message == "READY":
+                                print(client_message)
+                                if client_message == "{Error: 0}":
                                     self.state = 'ready'
                                     self.clientAddress = clientAddress
 
@@ -178,6 +179,6 @@ class Hangman(object):
 
 if __name__ == "__main__":
    IP = 'localhost'
-   port = 5280
+   port = "19"
    host = Hangman(IP, port)
    host.play()

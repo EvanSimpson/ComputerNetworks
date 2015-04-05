@@ -5,7 +5,7 @@ from bj import *
 from UDP import UDP, UDPHeader, encode_udp, decode_udp
 from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
-from pi import transmit, receive
+#from pi import transmit, receive
 import threading
 
 lock = threading.Lock()
@@ -42,15 +42,15 @@ class Stack():
 	#listening out over joesocket and gpio
 
 	def listen_for_input(self):
-		gpio_thread = self.listen_over_gpio()
+		#gpio_thread = self.listen_over_gpio()
 		while True:
 
-			lock.acquire(blocking=True)
-			try:
-				if (received_packet!=""):
-					self.handle_input_from_gpio(received_packet)
-			finally:
-				lock.release()
+			# lock.acquire(blocking=True)
+			# try:
+			# 	if (received_packet!=""):
+			# 		self.handle_input_from_gpio(received_packet)
+			# finally:
+			# 	lock.release()
 
 			self.listen_for_games()
 
@@ -98,6 +98,7 @@ class Stack():
 
 	def joesocket_bind(self, source_address):
 		port = source_address[1]
+		print("port is "+str(self.active_game_ports[port]))
 		self.send_acknowledgement(self.active_game_ports[port])
 
 	def joesocket_close(self, source_address):
@@ -107,12 +108,14 @@ class Stack():
 		self.send_acknowledgement(socket_port)
 
 	def joesocket_sendto(self, source_address, destination_address, data):
+		print(data)
 		self.send_message_over_gpio(source_address, destination_address, data)
 		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
-		self.game_server_socket.sendto(return_message, client_address)
+		print("client address for ACK is " + str(client_address))
+		by = self.game_server_socket.sendto(return_message, client_address)
 
 	#sending data over gpio based on input from joesocket
 
@@ -124,10 +127,11 @@ class Stack():
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
+		print(type(destination_address))
 		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding="UTF-8"))
 		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
 
 if __name__ == "__main__":
 	stack = Stack()
-	stack.send_message_over_gpio("hello world")
+	#stack.send_message_over_gpio("hello world")
 	stack.listen_for_input()

@@ -1,13 +1,13 @@
 import json
-import socket
+from socket import *
 import generate_port
 
 localhost = '127.0.0.1'
 stack_port = 5000
 olinhost = 'A'
 
-class JoeSocket(object):
-    def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
+class JoeSocket(socket):
+    def __init__(self, family=AF_INET, n_type=SOCK_STREAM, proto=0):
         self._family = family
         self._type = n_type
         self._proto = proto
@@ -25,7 +25,7 @@ class JoeSocket(object):
             self.close()
 
     def _initialize_socket(self):
-        self._pysock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._pysock = socket(AF_INET, SOCK_DGRAM)
         self._address = (olinhost, "01")
 
     def bind(self, address):
@@ -39,6 +39,7 @@ class JoeSocket(object):
             sent = self._pysock.sendto(payload, self._stack_address)
             while 1:
                 try:
+                    print("my address is " + str(self._pysock.getsockname()))
                     from_stack, stack_address = self._pysock.recvfrom(1024)
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response["Error"] != 0:
@@ -46,12 +47,12 @@ class JoeSocket(object):
                         print("Error: " + response["Error"])
                     else:
                         return 0
-                except e:
+                except:
                     # TODO check error to make sure socket is still open
-                    print(e)
-        except e:
-            print(e)
+                    continue
+        except:
             # TODO error handling here
+            pass
 
     def close(self):
         # Mark the socket closed. The underlying system resource (e.g. a file
@@ -83,16 +84,16 @@ class JoeSocket(object):
                         # TODO error handling here
                     else:
                         return 0
-                except e:
-                    print(e)
-        except e:
+                except:
+                    pass
+        except:
             # TODO check error to make sure socket is still open
-            print(e)
+            pass
 
         self._closed = True
         self._pysock.close()
 
-    def recvfrom(self, buffsize, flags):
+    def recvfrom(self, buffsize):
         # Receive data from the socket. The return value is a pair
         # (bytes, address) where bytes is a bytes object representing the data
         # received and address is the address of the socket sending the data.
@@ -104,7 +105,7 @@ class JoeSocket(object):
         try:
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
-            from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
+            from_stack, stack_address = self._pysock.recvfrom(buffsize, self._stack_address)
             response = json.loads(from_stack.decode("UTF-8"))
             return (response.payload, response.address)
         except:
@@ -127,6 +128,5 @@ class JoeSocket(object):
             pass
 
 if __name__ == "__main__":
-    sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("CC", "19"))
-    sock.close()
+    sock = JoeSocket(AF_INET, SOCK_DGRAM)
+    sock.sendto(bytearray("Hello world", encoding="UTF-8"), ("CC", "19"))
