@@ -1,5 +1,5 @@
 import sys
-import sockets
+import socket
 import pi
 import threading
 
