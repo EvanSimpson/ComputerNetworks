@@ -27,7 +27,7 @@ def recv_run():
 
 class GPIOServe(object):
     def __init__(self):
-        self.sock = socket.socket(socket.AF_INTET, socket.SOCK_DGRAM)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.stack_address = False
 
         self.recv_thread = threading.Thread(target=recv_run)
