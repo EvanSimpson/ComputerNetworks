@@ -19,9 +19,12 @@ class PortAuthority(object):
 
 
     def free_port_num(self, sys_addr):
+        to_del = []
         for k,v in self.ports.items():
-            if sys_addr = v:
-                del self.ports[k]
+            if sys_addr == v:
+                to_del.append(k)
+        for k in to_del:
+            del self.ports[k]
         return
 
     def listen(self):
