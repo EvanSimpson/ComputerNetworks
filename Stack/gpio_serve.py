@@ -40,7 +40,7 @@ class GPIOServe(object):
 
             # Start the GPIO receive thread
             recv_flag.flag = True
-            self.recv_thread.run()
+            self.recv_thread.start()
 
             while True:
                 try:
