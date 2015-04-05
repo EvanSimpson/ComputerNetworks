@@ -70,11 +70,11 @@ class Hangman(object):
                     # Get input word
                     while True:
                         self.sock.bind((self.ownIP, self.ownPort))
-                        print(self.state)
                         self.sock.settimeout(2.0)
 
                         # Wait for client to connect
                         while self.state == 'initialized':
+                            #import pdb; pdb.set_trace()
                             try:
                                 input_from_client, clientAddress = sock.recvfrom(1024)
                                 client_message = input_from_client.decode("UTF-8")
@@ -82,10 +82,10 @@ class Hangman(object):
                                 if client_message == "{Error: 0}":
                                     self.state = 'ready'
                                     self.clientAddress = clientAddress
-
                             except:
-                                continue
-
+                                print("ERROR")
+                                raise 
+                        print("out of initialize loop")
                         while self.state == 'ready':
                             inputWord = input("Enter the word to be guessed:\n")
                             if not inputWord.isalpha():

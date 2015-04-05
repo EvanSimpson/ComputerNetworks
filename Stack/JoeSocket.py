@@ -27,6 +27,7 @@ class JoeSocket(socket):
     def _initialize_socket(self):
         self._pysock = socket(AF_INET, SOCK_DGRAM)
         self._address = (olinhost, "01")
+        self._pysock.bind((localhost, 0))
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
@@ -34,12 +35,11 @@ class JoeSocket(socket):
         if not self._pysock:
             self._initialize_socket()
         try:
-            self._address = address
+            self._address = address          
             payload = bytearray(json.dumps({'command': 'bind', 'params': {'source_address': self._address}}), encoding="UTF-8")
             sent = self._pysock.sendto(payload, self._stack_address)
             while 1:
                 try:
-                    print("my address is " + str(self._pysock.getsockname()))
                     from_stack, stack_address = self._pysock.recvfrom(1024)
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response["Error"] != 0:
@@ -105,12 +105,13 @@ class JoeSocket(socket):
         try:
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
-            from_stack, stack_address = self._pysock.recvfrom(buffsize, self._stack_address)
+            from_stack, stack_address = self._pysock.recvfrom(1024) #, self._stack_address)
             response = json.loads(from_stack.decode("UTF-8"))
             return (response.payload, response.address)
         except:
             #TODO throw the same error that the pysocket would have thrown
-            pass
+            print("ERROR")
+            raise
 
     def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
