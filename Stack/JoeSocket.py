@@ -24,10 +24,10 @@ class JoeSocket(socket):
         if not self._closed:
             self.close()
 
-    def _initialize_socket(self):
+    def _initialize_socket(self, port=0):
         self._pysock = socket(AF_INET, SOCK_DGRAM)
         self._address = (olinhost, "01")
-        self._pysock.bind((localhost, 0))
+        self._pysock.bind((localhost, port))
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
@@ -105,7 +105,7 @@ class JoeSocket(socket):
         try:
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
-            from_stack, stack_address = self._pysock.recvfrom(1024) #, self._stack_address)
+            from_stack, stack_address = self._pysock.recvfrom(buffsize) #, self._stack_address)
             response = json.loads(from_stack.decode("UTF-8"))
             return (response.payload, response.address)
         except:
@@ -122,12 +122,16 @@ class JoeSocket(socket):
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
-            payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
+            payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": (address[0], str(address[1])), "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
             sent = self._pysock.sendto(payload, self._stack_address)
         else:
             #error
             pass
 
+    def getsockname(self):
+        return self._address
+
 if __name__ == "__main__":
-    sock = JoeSocket(AF_INET, SOCK_DGRAM)
-    sock.sendto(bytearray("Hello world", encoding="UTF-8"), ("CC", "19"))
+    pass
+
+    #sock.sendto(bytearray("Hello world", encoding="UTF-8"), ("CC", "19"))

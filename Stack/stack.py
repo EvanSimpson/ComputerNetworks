@@ -108,14 +108,16 @@ class Stack():
 		self.send_acknowledgement(socket_port)
 
 	def joesocket_sendto(self, source_address, destination_address, data):
-		print(data)
+		# print(data)
+		# print("destination address: " + str(destination_address))
+		# print("source address: " + str(source_address))
+		# print("active: " + str(self.active_game_ports))
 		self.send_message_over_gpio(source_address, destination_address, data)
 		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
-		print("client address for ACK is " + str(client_address))
-		by = self.game_server_socket.sendto(return_message, client_address)
+		self.game_server_socket.sendto(return_message, client_address)
 
 	#sending data over gpio based on input from joesocket
 
@@ -134,3 +136,5 @@ if __name__ == "__main__":
 	stack = Stack()
 	#stack.send_message_over_gpio("hello world")
 	stack.listen_for_input()
+	#stack.send_acknowledgement(('127.0.0.1', 5002))
+
