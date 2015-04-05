@@ -48,9 +48,9 @@ class GPIOServe(object):
                     # Check if something has come in from the GPIO and send it
                     # over to the stack if so
                     send_buffer_lock.acquire()
-                        if len(send_buffer) > 0 && self.stack_address:
-                            s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
-                            del send_buffer[0]
+                    if len(send_buffer) > 0 && self.stack_address:
+                        s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
+                        del send_buffer[0]
                     send_buffer_lock.release()
 
                     # Check if something has come in from the stack and send it
