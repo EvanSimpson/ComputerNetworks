@@ -53,6 +53,17 @@ class GPIOServe(object):
                         del send_buffer[0]
                     send_buffer_lock.release()
 
+                except KeyboardInterrupt:
+                    # Shut it down
+                    recv_flag_lock.acquire()
+                    recv_flag.flag = False
+                    recv_flag_lock.release()
+                    s.close()
+                    pi.kill()
+                    sys.exit()
+
+
+                try:
                     # Check if something has come in from the stack and send it
                     # over to the GPIO if so
                     (from_stack, stack_address) = s.recvfrom(1024)
@@ -60,7 +71,6 @@ class GPIOServe(object):
                     data = from_stack.decode("UTF-8")
                     if len(data) > 1:
                         pi.transmit(data)
-
 
                 except KeyboardInterrupt:
                     # Shut it down
@@ -70,6 +80,7 @@ class GPIOServe(object):
                     s.close()
                     pi.kill()
                     sys.exit()
+
 
 if __name__ == "__main__":
     server = GPIOServe()

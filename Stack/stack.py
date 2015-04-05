@@ -50,6 +50,12 @@ class Stack():
 
 			try:
 				self.listen_over_gpio()
+			except:
+				self.gpio_server_socket.close()
+				self.game_server_socket.close()
+				sys.exit()
+
+			try:
 				self.listen_for_games()
 			except:
 				self.gpio_server_socket.close()
