@@ -1,16 +1,15 @@
 import RPi.GPIO as GPIO
 import time
-import threading
 
-def prepare_pins(dtpin = 17, ctpin = 18, crpin = 22, drpin = 23):
+def prepare_pins(data_transmit_pin = 18, carrier_transmit_pin = 17, carrier_read_pin = 22, data_read_pin = 23):
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(dtpin,GPIO.OUT)
-	GPIO.setup(ctpin,GPIO.OUT)
-	GPIO.setup(crpin,GPIO.IN)
-	GPIO.setup(drpin,GPIO.IN)
+	GPIO.setup(data_transmit_pin,GPIO.OUT)
+	GPIO.setup(carrier_transmit_pin,GPIO.OUT)
+	GPIO.setup(carrier_read_pin,GPIO.IN)
+	GPIO.setup(data_read_pin,GPIO.IN)
 
 def kill():
-        GPIO.cleanup()
+	GPIO.cleanup()
 
 def turn_high(pin):
 	GPIO.output(pin,GPIO.HIGH)
@@ -18,80 +17,74 @@ def turn_high(pin):
 def turn_low(pin):
 	GPIO.output(pin,GPIO.LOW)
 
-def delay(t):
-	time.sleep(t)
-
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, dtpin=17,ctpin = 18, crpin = 22, drpin = 23, duration = 1):
+def transmit(data, data_transmit_pin=18, carrier_transmit_pin = 17, carrier_read_pin = 22, data_read_pin = 23, duration = 1):
 	prepare_pins()
 	counter = 0
 	while(True):
-		busy = read_pin(crpin)
+		busy = read_pin(carrier_read_pin)
 		if (busy == 0):
 			counter = counter + 1
 		if (busy == 1):
 			counter = 0
 		if counter >= 8:
 			break
-		delay(.1)
-	turn_high(ctpin)
-	for i in range(len(data)):	
-		if data[i]==1:
-			turn_high(dtpin)
+		time.sleep(.1)
+	turn_high(carrier_transmit_pin)
+	for i in range(len(data)):
+		if data[i]==1:
+			turn_high(data_transmit_pin)
 		else:
-			turn_low(dtpin)
-		delay(duration)
-	turn_low(dtpin)
-	turn_low(ctpin)
+			turn_low(data_transmit_pin)
+		time.sleep(duration)
+	turn_low(data_transmit_pin)
+	turn_low(carrier_transmit_pin)
 
+def receive(lock, recv_flag, data_read_pin=23,carrier_read_pin = 22):
+	prepare_pins()
+	times = []
+	def callback1(channel):
+		times.append(time.time())
+	def callback2(channel):
+		times.append(time.time())
+		if not(read_pin(22)):
+			times.append(-1)
+	GPIO.add_event_detect(carrier_read_pin,GPIO.BOTH,callback = callback2)
+	GPIO.add_event_detect(data_read_pin,GPIO.BOTH,callback = callback1)
+	lock.acquire()
+	while(recv_flag.flag):
+		lock.release()
+		if (len(times)>0) and (times[-1]==-1):
+			yield process(times[1:-1])
 
-def receive(lock, drpin=23,crpin = 22):
-    global received_packet
-    prepare_pins()
-    times = []
-    def cbf(channel):
-        times.append(time.time())
-    def cbf2(channel):
-        times.append(time.time())
-        if not(read_pin(22)):
-             times.append(-1)
-    GPIO.add_event_detect(crpin,GPIO.BOTH,callback = cbf2)
-    GPIO.add_event_detect(drpin,GPIO.BOTH,callback = cbf)
-    while(True):
-        if (len(times)>0) and (times[-1]==-1):
-            lock.aquire(blocking=True)
-            try:
-                received_packet = process(times[1:-1])
-            finally:
-                lock.release()
-            #yield process(times[1:-1])
-
-            times = []
+			times = []
+		lock.acquire()
+	lock.release()
 
 def process(times):
-    bin = ""
-    buffer = []
-    dur = .001
-    dts = [x - y for (x,y) in zip(times[1:],times[:-1])]
-    flag = False
-    for i in range(len(dts)):  
-        if flag:
-           if dts[i]<dur*2:
-               bin = bin + '1'
-           else:
-               bin = bin + '111'
-        else:
-           if dts[i]<dur*2:
-               bin = bin + '0'
-           elif dts[i]<dur*5:
-               bin = bin + '000'
-           else:
-               bin = bin + '0000000'
-        flag = not(flag)
-    return bin
+	binput = ""
+	buffer = []
+	duration = .001
+	delta_times = [x - y for (x,y) in zip(times[1:],times[:-1])]
+	flag = False
+	for i in range(len(delta_times)):
+		if flag:
+			if delta_times[i]<duration*2:
+				binput = binput + '1'
+			else:
+				binput = binput + '111'
+		else:
+			if delta_times[i]<duration*2:
+				binput = binput + '0'
+			elif delta_times[i]<duration*5:
+				binput = binput + '000'
+			else:
+				binput = binput + '0000000'
+		flag = not(flag)
+		return binput
 
 if __name__ == "__main__":
-    data = receive()
-    print(next(data))
+	data = receive()
+	print(next(data))
