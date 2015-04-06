@@ -7,14 +7,14 @@ from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
 
 localhost = '127.0.0.1'
-routerport = 5073
+routerport = 2048
 gpioports = [5003, 5004, 5005]
 
 LANs = {
-			"A" : "127.0.0.1",
-			"B" : "127.0.0.1",
-			"C" : "127.0.0.1",
-			"D" : "127.0.0.1"
+			"A" : "192.168.128.103",
+			"B" : "192.168.128.110",
+			"C" : "192.168.128.111", # CATBUG
+			"D" : "192.168.128.102"
 			}
 
 class RouterStack():
