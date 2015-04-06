@@ -42,7 +42,7 @@ def transmit(data, data_transmit_pin=18, carrier_transmit_pin = 17, carrier_read
 	turn_low(data_transmit_pin)
 	turn_low(carrier_transmit_pin)
 
-def receive(lock, recv_flag, data_read_pin=23,carrier_read_pin = 22):
+def receive(data_read_pin=23,carrier_read_pin = 22):
 	prepare_pins()
 	times = []
 	def callback1(channel):
@@ -53,19 +53,21 @@ def receive(lock, recv_flag, data_read_pin=23,carrier_read_pin = 22):
 			times.append(-1)
 	GPIO.add_event_detect(carrier_read_pin,GPIO.BOTH,callback = callback2)
 	GPIO.add_event_detect(data_read_pin,GPIO.BOTH,callback = callback1)
-	lock.acquire()
-	while(recv_flag.flag):
-		lock.release()
-		if (len(times)>0) and (times[-1]==-1):
-			yield process(times[1:-1])
+	# lock.acquire()
+	# while(recv_flag.flag):
+	# 	lock.release()
+	# 	if (len(times)>0) and (times[-1]==-1):
+	# 		yield process(times[1:-1])
 
-			times = []
-		lock.acquire()
-	lock.release()
+	# 		times = []
+	# 	lock.acquire()
+    while(True):
+        if (len(times)>0) and (times[-1]==-1):
+            yield process(times[:-1])
+            times = []
 
 def process(times):
 	binput = ""
-	buffer = []
 	duration = .001
 	delta_times = [x - y for (x,y) in zip(times[1:],times[:-1])]
 	flag = False
@@ -88,3 +90,4 @@ def process(times):
 if __name__ == "__main__":
 	data = receive()
 	print(next(data))
+    kill()
