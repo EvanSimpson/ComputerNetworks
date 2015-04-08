@@ -9,7 +9,7 @@ def prepare_pins_in(data_pin = 18,carrier_pin = 23):
 def prepare_pins_out(data_pin = 18,carrier_pin = 23):
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(carrier_pin,GPIO.OUT)
-	GPIO.setup(data_piN,GPIO.OUT)
+	GPIO.setup(data_pin,GPIO.OUT)
 
 def kill():
 	GPIO.cleanup()
@@ -38,7 +38,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
 	prepare_pins_out()
 	turn_high(carrier_pin)
 	for i in range(len(data)):
-		if data[i]==1:
+		if data[i]=="1":
 			turn_high(data_pin)
 		else:
 			turn_low(data_pin)
