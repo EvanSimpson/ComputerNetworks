@@ -1,10 +1,15 @@
 import RPi.GPIO as GPIO
 import time
 
-def prepare_pins(data_pin = 18,carrier_pin = 23):
+def prepare_pins_in(data_pin = 18,carrier_pin = 23):
 	GPIO.setmode(GPIO.BCM)
 	GPIO.setup(carrier_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 	GPIO.setup(data_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+
+def prepare_pins_out(data_pin = 18,carrier_pin = 23):
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(carrier_pin,GPIO.OUT)
+	GPIO.setup(data_piN,GPIO.OUT)
 
 def kill():
 	GPIO.cleanup()
@@ -19,7 +24,7 @@ def read_pin(pin):
 	return GPIO.input(pin)
 
 def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
-	prepare_pins(data_pin, carrier_pin)
+	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
 	while(True):
 		busy = read_pin(carrier_pin)
@@ -30,7 +35,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
 		if counter >= 8:
 			break
 		time.sleep(.01)
-
+	prepare_pins_out()
 	turn_high(carrier_pin)
 	for i in range(len(data)):
 		if data[i]==1:
@@ -42,7 +47,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
 	turn_low(carrier_pin)
 
 def receive(data_pin=18, carrier_pin = 23, duration = .001):
-	prepare_pins(data_pin,carrier_pin)
+	prepare_pins_in(data_pin,carrier_pin)
 	times = []
 	def data_callback(channel):
 		times.append(time.time())
@@ -52,10 +57,10 @@ def receive(data_pin=18, carrier_pin = 23, duration = .001):
 			times.append(-1)
 	GPIO.add_event_detect(data_pin,GPIO.BOTH,callback = data_callback)
 	GPIO.add_event_detect(carrier_pin,GPIO.BOTH,callback = carrier_callback)
-    while(True):
-        if (len(times)>0) and (times[-1] == -1):
-            yield process(times,duration)
-            times = []
+	while(True):
+		if (len(times)>0) and (times[-1] == -1):
+			yield process(times,duration)
+			times = []
 
 def process(times,duration):
 	binput = ""
@@ -68,7 +73,7 @@ def process(times,duration):
 			else:
 				binput = binput + '111'
 		else:
-			if delta_times[i]<duration*2
+			if delta_times[i]<duration*2:
 				binput = binput + '0'
 			elif delta_times[i]<duration*5:
 				binput = binput + '000'
@@ -79,4 +84,4 @@ def process(times,duration):
 
 if __name__ == "__main__":
 	transmit("11101010001000000010111")
-    kill()
+	kill()
