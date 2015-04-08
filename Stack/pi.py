@@ -1,74 +1,77 @@
 import RPi.GPIO as GPIO
 import time
 
-def prepare_pins(data_transmit_pin = 18, carrier_transmit_pin = 17, carrier_read_pin = 22, data_read_pin = 23):
+def prepare_pins_in(data_pin = 18,carrier_pin = 23):
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(data_transmit_pin,GPIO.OUT)
-	GPIO.setup(carrier_transmit_pin,GPIO.OUT)
-	GPIO.setup(carrier_read_pin,GPIO.IN)
-	GPIO.setup(data_read_pin,GPIO.IN)
+	GPIO.setup(carrier_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+	GPIO.setup(data_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+
+def prepare_pins_out(data_pin = 18,carrier_pin = 23):
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(carrier_pin,GPIO.OUT)
+	GPIO.setup(data_pin,GPIO.OUT)
 
 def kill():
 	GPIO.cleanup()
 
 def turn_high(pin):
-	GPIO.output(pin,GPIO.HIGH)
+	GPIO.output(pin, GPIO.HIGH)
 
 def turn_low(pin):
-	GPIO.output(pin,GPIO.LOW)
+	GPIO.output(pin, GPIO.LOW)
 
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, data_transmit_pin=18, carrier_transmit_pin = 17, carrier_read_pin = 22, data_read_pin = 23, duration = 1):
-	prepare_pins()
+def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
+	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
 	while(True):
-		busy = read_pin(carrier_read_pin)
+		busy = read_pin(carrier_pin)
 		if (busy == 0):
 			counter = counter + 1
 		if (busy == 1):
 			counter = 0
 		if counter >= 8:
 			break
-		time.sleep(.1)
-	turn_high(carrier_transmit_pin)
-	for i in range(len(data)):
-		if data[i]==1:
-			turn_high(data_transmit_pin)
-		else:
-			turn_low(data_transmit_pin)
 		time.sleep(duration)
-	turn_low(data_transmit_pin)
-	turn_low(carrier_transmit_pin)
+	prepare_pins_out()
+	turn_high(carrier_pin)
+	for i in range(len(data)):
+		if data[i]=="1":
+			turn_high(data_pin)
+		else:
+			turn_low(data_pin)
+		time.sleep(duration)
+	turn_low(data_pin)
+	time.sleep(duration)
+	turn_low(carrier_pin)
 
-def receive(data_read_pin=23,carrier_read_pin = 22):
-	prepare_pins()
+def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01):
+	prepare_pins_in(data_pin, carrier_pin)
 	times = []
-	def callback1(channel):
+	def data_callback(channel):
 		times.append(time.time())
-	def callback2(channel):
+	def carrier_callback(channel):
 		times.append(time.time())
-		if not(read_pin(22)):
+		if not read_pin(carrier_pin):
 			times.append(-1)
-	GPIO.add_event_detect(carrier_read_pin,GPIO.BOTH,callback = callback2)
-	GPIO.add_event_detect(data_read_pin,GPIO.BOTH,callback = callback1)
-	# lock.acquire()
-	# while(recv_flag.flag):
-	# 	lock.release()
-	# 	if (len(times)>0) and (times[-1]==-1):
-	# 		yield process(times[1:-1])
+		print("Carrier")
+	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
+	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
+	if lock.acquire():
+		while(recv_flag.flag):
+			lock.release()
+			if (len(times)>0) and (times[-1] ==-1):
+				x = process(times[:-1], duration)
+				print(x)
+				yield x #process(times[:-1], duration)
+				times = []
+			lock.acquire(blocking=True)
+	lock.release()
 
-	# 		times = []
-	# 	lock.acquire()
-    while(True):
-        if (len(times)>0) and (times[-1]==-1):
-            yield process(times[:-1])
-            times = []
-
-def process(times):
+def process(times, duration):
 	binput = ""
-	duration = .001
 	delta_times = [x - y for (x,y) in zip(times[1:],times[:-1])]
 	flag = False
 	for i in range(len(delta_times)):
@@ -85,9 +88,10 @@ def process(times):
 			else:
 				binput = binput + '0000000'
 		flag = not(flag)
-		return binput
+	return binput[1:-1]
 
 if __name__ == "__main__":
-	data = receive()
-	print(next(data))
-    kill()
+	transmit("11101010001000000010111")
+	#data = receive()
+	#print(next(data))
+	kill()
