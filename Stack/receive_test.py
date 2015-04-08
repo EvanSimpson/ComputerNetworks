@@ -23,7 +23,7 @@ def turn_low(pin):
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
+def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
 	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
 	while(True):
@@ -38,6 +38,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
 	prepare_pins_out()
 	turn_high(carrier_pin)
 	for i in range(len(data)):
+		print(data[i])
 		if data[i]=="1":
 			turn_high(data_pin)
 		else:
@@ -46,15 +47,17 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .001):
 	turn_low(data_pin)
 	turn_low(carrier_pin)
 
-def receive(data_pin=18, carrier_pin = 23, duration = .001):
+def receive(data_pin=18, carrier_pin = 23, duration = .01):
 	prepare_pins_in(data_pin,carrier_pin)
 	times = []
 	def data_callback(channel):
 		times.append(time.time())
+		print("Data")
 	def carrier_callback(channel):
 		times.append(time.time())
 		if not(read_pin(carrier_pin)):
 			times.append(-1)
+		print("Carrier")
 	GPIO.add_event_detect(data_pin,GPIO.BOTH,callback = data_callback)
 	GPIO.add_event_detect(carrier_pin,GPIO.BOTH,callback = carrier_callback)
 	while(True):
@@ -65,6 +68,7 @@ def receive(data_pin=18, carrier_pin = 23, duration = .001):
 def process(times,duration):
 	binput = ""
 	delta_times = [x - y for (x,y) in zip(times[1:],times[:-1])]
+	print(delta_times)
 	flag = False
 	for i in range(len(delta_times)):
 		if flag:
@@ -80,8 +84,10 @@ def process(times,duration):
 			else:
 				binput = binput + '0000000'
 		flag = not(flag)
-		return binput
+	return binput
 
 if __name__ == "__main__":
-	transmit("11101010001000000010111")
+	#transmit("11101010001000000010111")
+	x = receive()
+	print(next(x))
 	kill()
