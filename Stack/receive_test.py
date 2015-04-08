@@ -15,10 +15,10 @@ def kill():
 	GPIO.cleanup()
 
 def turn_high(pin):
-	GPIO.output(pin, GPIO.HIGH)
+	GPIO.output(pin,GPIO.HIGH)
 
 def turn_low(pin):
-	GPIO.output(pin, GPIO.LOW)
+	GPIO.output(pin,GPIO.LOW)
 
 def read_pin(pin):
 	return GPIO.input(pin)
@@ -34,45 +34,42 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
 			counter = 0
 		if counter >= 8:
 			break
-		time.sleep(duration)
+		time.sleep(.01)
 	prepare_pins_out()
 	turn_high(carrier_pin)
 	for i in range(len(data)):
+		print(data[i])
 		if data[i]=="1":
 			turn_high(data_pin)
 		else:
 			turn_low(data_pin)
 		time.sleep(duration)
 	turn_low(data_pin)
-	time.sleep(duration)
+	time.sleep(.01)
 	turn_low(carrier_pin)
 
-def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01):
-	prepare_pins_in(data_pin, carrier_pin)
+def receive(data_pin=18, carrier_pin = 23, duration = .01):
+	prepare_pins_in(data_pin,carrier_pin)
 	times = []
 	def data_callback(channel):
 		times.append(time.time())
+		print("Data")
 	def carrier_callback(channel):
 		times.append(time.time())
-		if not read_pin(carrier_pin):
+		if not(read_pin(carrier_pin)):
 			times.append(-1)
 		print("Carrier")
-	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
-	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
-	if lock.acquire():
-		while(recv_flag.flag):
-			lock.release()
-			if (len(times)>0) and (times[-1] ==-1):
-				x = process(times[:-1], duration)
-				print(x)
-				yield x #process(times[:-1], duration)
-				times = []
-			lock.acquire(blocking=True)
-	lock.release()
+	GPIO.add_event_detect(data_pin,GPIO.BOTH,callback = data_callback)
+	GPIO.add_event_detect(carrier_pin,GPIO.BOTH,callback = carrier_callback)
+	while(True):
+		if (len(times)>0) and (times[-1] == -1):
+			yield process(times[:-1],duration)
+			times = []
 
-def process(times, duration):
+def process(times,duration):
 	binput = ""
 	delta_times = [x - y for (x,y) in zip(times[1:],times[:-1])]
+	print(delta_times)
 	flag = False
 	for i in range(len(delta_times)):
 		if flag:
@@ -88,10 +85,10 @@ def process(times, duration):
 			else:
 				binput = binput + '0000000'
 		flag = not(flag)
-	return binput[1:-1]
+	return binput
 
 if __name__ == "__main__":
 	transmit("11101010001000000010111")
-	#data = receive()
-	#print(next(data))
+	#x = receive()
+	#print(next(x))
 	kill()
