@@ -8,14 +8,19 @@ from morse import morse_down, morse_up
 
 localhost = '127.0.0.1'
 routerport = 5073
-gpioports = [5003, 5004, 5005]
+local_lan = "C"
+gpioports = {
+	"1" : 5003, 
+	"2" : 5004,
+	"3" : 5005
+	}
 
 LANs = {
-			"A" : "127.0.0.1",
-			"B" : "127.0.0.1",
-			"C" : "127.0.0.1",
-			"D" : "127.0.0.1"
-			}
+	"A" : "127.0.0.1",
+	"B" : "127.0.0.1",
+	"C" : "127.0.0.1",
+	"D" : "127.0.0.1"
+	}
 
 class RouterStack():
 
@@ -30,96 +35,84 @@ class RouterStack():
 		mac_layer = BJ(encode_message, decode_message)
 		udp_layer = BJ(encode_udp, decode_udp)
 
-		self.stack = BJ_Stack([udp_layer, mac_layer, morse_layer])
-		self.extern_stack = BJ_Stack([udp_layer])
+		self.internal_stack = BJ_Stack([mac_layer, morse_layer])
+		self.external_stack = BJ_Stack([udp_layer])
 
 	def setup_servers(self):
 		self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.switch_socket.bind((localhost, routerport))
 
-		self.gpio_sockets = []
+		self.gpio_sockets = {}
 
-		for i in (range(len(gpioports)):
-			self.gpio_sockets[i] = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			self.gpio_sockets[i].sendto(bytearray(0x01), (localhost, gpioports[i]))
+		for client_id in gpioports:
+			self.gpio_sockets[client_id] = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			self.gpio_sockets[client_id].sendto(bytearray(0x01), (localhost, gpioports[client_id]))
 
-	#listening out over joesocket and gpio
+	#listening for input over switch and gpio
 
-	def listen_for_input(self):
+	def receive_input(self):
 		while True:
-			try:
-				self.listen_over_gpio()
-			except:
-				for socket in self.gpio_sockets:
-					socket.close()
+			self.receive_over_gpio()
+			self.receive_over_switch()
+
+	def receive_over_switch():
+		try:
+			(incoming, socket_server_address) = switch_socket.recvfrom(1024)
+			self.handle_input_from_switch(incoming, socket_server_address)
+		except:
+			switch_socket.close()
+			sys.exit()
+
+	def receive_over_gpio(self):
+		#DO WE WANT TO CLOSE ALL OF THE SOCKETS BEFORE WE SYS.EXIT?
+		try:
+			for socket in self.gpio_sockets:
+				(incoming, gpio_server_address) = socket.recvfrom(1024)
+				self.handle_input_from_gpio(incoming, gpio_server_address)
+		except:
+			for socket in self.gpio_sockets:
+				socket.close()
 				sys.exit()
-
-	def listen_over_gpio(self):
-		for socket in self.gpio_sockets:
-			(incoming, gpio_server_address) = socket.recvfrom(1024)
-		self.handle_input_from_gpio(incoming, gpio_server_address)
-
+	
 	#handling inputs
 
-	def handle_input_from_gpio(self, message_received, incoming_address):
-		udp_input = self.stack.ascend(message_received)
-		destination_port = udp_input.udp_header._destinationPort
+	def handle_input_from_switch(self, message_received, incoming_address):
+		dummy_mac = Mac("0", "0", "0", message_received.decode("UTF-8"))
+		
+		udp_input = self.external_stack.ascend(dummy_mac)
+		self.route_message(udp_input)
 
+	def handle_input_from_gpio(self, message_received, incoming_address):
+		mac_obj = self.internal_stack.ascend(message_received.decode("UTF-8"))
+		self.route_message()
+
+	def route_message(self, udp_input):
 		# decide which LAN this message is going to
 		# if it's local, send it out over the appropriate socket
-		# it it's another LAN, send it to the switch,
-		# but what do we send the switch?
-		dest_addr = udp_input.ip_header._destinationAddress
-		dest_lan = dest_addr[0]
-		if dest_lan == "C":
-			# Going to stay internal to this LAN
-			dest_client = dest_addr[1]
-
+		# it it's another LAN, send it to the switch
+		
+		if mac_obj.destination in gpioports:
+			self.send_message_internally(mac_obj)
 		else:
-			# Needs to go out over the switch
-			dest_lan_ip = LANs[dest_lan]
-			to_send = self.extern_stack.descend(udp_input.packet)
-			self.switch_socket.sendto(bytearray(to_send, encoding="UTF-8"), (dest_lan_ip, routerport))
+			udp_input = self.external_stack.ascend(mac_obj)
+			self.send_message_externally(udp_input)
 
+	def send_message_internally(self, mac_obj): 
+		#send the message over the gpio to the pi corresponding with dest_client
+		destination_client = mac_obj.destination
 
-		payload = udp_input.udp_header._payload
-		source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
+		port = gpioports[destination_client]
+		gpio_socket = self.gpio_sockets[destination_client]
+		message_in_bin = self.internal_stack.descend(mac_obj)
+		#does the socket want a bytearray or a string?
+		gpio_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
 
+	def send_message_externally(self, udp_input):
+		destination_lan_ip = LANs[udp_input.ip_header._destinationAddress[0]]
 
-	# functions called on joesocket commands
-
-	def joesocket_bind(self, source_address):
-		port = source_address[1]
-		self.send_acknowledgement(self.active_game_ports[port])
-
-	def joesocket_close(self, source_address):
-		port = source_address[1]
-		if port in self.active_game_ports:
-			socket_port = self.active_game_ports.pop(port)
-		self.send_acknowledgement(socket_port)
-
-	def joesocket_sendto(self, source_address, destination_address, data):
-		self.send_message_over_gpio(source_address, destination_address, data)
-		self.send_acknowledgement(self.active_game_ports[source_address[1]])
-
-	def send_acknowledgement(self, client_address):
-		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
-		self.game_server_socket.sendto(return_message, client_address)
-
-	#sending data over gpio based on input from joesocket
-
-	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
-		udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
-		to_transmit_string = self.stack.descend(udp_obj)
-		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
-		self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
-
-	def initialize_udp(self, source_address, destination_address, message_to_send):
-		udp_header = UDPHeader()
-		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding="UTF-8"))
-		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
-
+		serialized_udp_packet = self.external_stack.descend(udp_input)
+		#to_send should be a bytearray but I'm not suuure
+		self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
+	
 if __name__ == "__main__":
-	stack = Stack()
-	stack.send_message_over_gpio("hello world")
-	stack.listen_for_input()
+	print("nothing yet")
