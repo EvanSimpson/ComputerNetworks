@@ -45,6 +45,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
 			turn_low(data_pin)
 		time.sleep(duration)
 	turn_low(data_pin)
+	time.sleep(.01)
 	turn_low(carrier_pin)
 
 def receive(data_pin=18, carrier_pin = 23, duration = .01):
@@ -62,7 +63,7 @@ def receive(data_pin=18, carrier_pin = 23, duration = .01):
 	GPIO.add_event_detect(carrier_pin,GPIO.BOTH,callback = carrier_callback)
 	while(True):
 		if (len(times)>0) and (times[-1] == -1):
-			yield process(times,duration)
+			yield process(times[:-1],duration)
 			times = []
 
 def process(times,duration):
@@ -87,7 +88,7 @@ def process(times,duration):
 	return binput
 
 if __name__ == "__main__":
-	#transmit("11101010001000000010111")
-	x = receive()
-	print(next(x))
+	transmit("11101010001000000010111")
+	#x = receive()
+	#print(next(x))
 	kill()
