@@ -20,9 +20,9 @@ send_buffer_lock = threading.Lock()
 
 def recv_run():
     for data in pi.receive(recv_flag_lock, recv_flag):
-        send_buffer_lock.acquire()
-        send_buffer.append(data)
-        send_buffer_lock.release()
+        if send_buffer_lock.acquire():
+            send_buffer.append(data)
+            send_buffer_lock.release()
 
 
 class GPIOServe(object):
@@ -37,6 +37,7 @@ class GPIOServe(object):
     def listen(self):
         with self.sock as s:
             s.bind((localhost, ownport))
+            s.setblocking(False)
 
             # Start the GPIO receive thread
             recv_flag.flag = True
@@ -47,17 +48,17 @@ class GPIOServe(object):
 
                     # Check if something has come in from the GPIO and send it
                     # over to the stack if so
-                    send_buffer_lock.acquire()
-                    if len(send_buffer) > 0 and self.stack_address:
-                        s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
-                        del send_buffer[0]
-                    send_buffer_lock.release()
+                    if send_buffer_lock.acquire():
+                        if len(send_buffer) > 0 and self.stack_address:
+                            s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
+                            del send_buffer[0]
+                        send_buffer_lock.release()
 
                 except KeyboardInterrupt:
                     # Shut it down
-                    recv_flag_lock.acquire()
-                    recv_flag.flag = False
-                    recv_flag_lock.release()
+                    if recv_flag_lock.acquire():
+                         recv_flag.flag = False
+                         recv_flag_lock.release()
                     s.close()
                     pi.kill()
                     sys.exit()
@@ -72,11 +73,14 @@ class GPIOServe(object):
                     if len(data) > 1:
                         pi.transmit(data)
 
+                except socket.error:
+                    continue
+
                 except KeyboardInterrupt:
                     # Shut it down
-                    recv_flag_lock.acquire()
-                    recv_flag.flag = False
-                    recv_flag_lock.release()
+                    if recv_flag_lock.acquire():
+                        recv_flag.flag = False
+                        recv_flag_lock.release()
                     s.close()
                     pi.kill()
                     sys.exit()
