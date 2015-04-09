@@ -50,7 +50,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.02, debug=False
 	time.sleep(duration)
 	turn_low(carrier_pin)
 
-def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01, debug=False):
+def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.02, debug=False):
 	prepare_pins_in(data_pin, carrier_pin)
 	times = []
 	def data_callback(channel):
