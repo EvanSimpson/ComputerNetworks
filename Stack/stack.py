@@ -221,7 +221,7 @@ class Stack():
 
 	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
 		udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
-		to_transmit_string = self.stack.descend(udp_obj)
+		to_transmit_string = self.full_stack.descend(udp_obj)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		try:
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
