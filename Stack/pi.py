@@ -113,6 +113,20 @@ def process(times, duration):
 	return binput[1:-1]
 
 if __name__ == "__main__":
+	import socket
+
+	gpio_serve_address = ('127.0.0.1', 5003)
+
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	sock.sendto(bytearray('1', encoding="UTF-8"), gpio_serve_address)
+
 	while True:
-		print(receive_no_lock())
-		kill()
+		try:
+			(data_in, address_in) = sock.recvfrom(1024)
+			print(data_in.decode("UTF-8"))
+		except socket.error:
+			continue
+		except:
+			break
+
+	sock.close()
