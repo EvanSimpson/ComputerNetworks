@@ -16,7 +16,7 @@ def bin2bytearray(bin_message):
   '''
   takes a binary string and turns it into the message as a bytearray
   '''
-  b = bytearray([ord(c) for c in bin2message(bin_message)])
+  b = [ord(c) for c in bin2message(bin_message)]
   print(b)
   return b
 

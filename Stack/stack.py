@@ -2,7 +2,8 @@ import sys
 import socket
 import json
 from bj import *
-from UDP import UDP, UDPHeader, IPHeader, encode_udp, decode_udp
+from UDP import encode_udp, decode_udp, encode_ip, decode_ip
+from MAC import encode_mac, decode_mac
 from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
 
@@ -44,12 +45,13 @@ class Stack():
 
 	def setup_bj(self):
 		morse_layer = BJ(morse_down, morse_up)
-		mac_layer = BJ(encode_message, decode_message)
+		mac_layer = BJ(encode_mac, decode_mac)
+		ip_layer = BJ(encode_ip, decode_ip)
 		udp_layer = BJ(encode_udp, decode_udp)
 
 		self.internal_stack = BJ_Stack([mac_layer, morse_layer])
-		self.external_stack = BJ_Stack([udp_layer])
-		self.full_stack = BJ_Stack([udp_layer, mac_layer, morse_layer])
+		self.external_stack = BJ_Stack([udp_layer, ip_layer])
+		self.full_stack = BJ_Stack([udp_layer, ip_layer, mac_layer, morse_layer])
 
 	def setup_servers(self):
 		self.gpio_address = (localhost, gpioport)
@@ -237,8 +239,11 @@ class Stack():
 	#sending data over gpio based on input from joesocket
 
 	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
-		udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
-		to_transmit_string = self.full_stack.descend(udp_obj)
+		# address = (LAN+host, port)
+		# param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
+		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], destination_address[1], destination_address[0][0], destination_address[0][1], message_to_send)
+		# udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
+		to_transmit_string = self.full_stack.descend(stack_entry)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		try:
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
@@ -246,6 +251,7 @@ class Stack():
 			pass
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
+
 		ip_header = IPHeader()
 		print(type(message_to_send))
 		ip_header.setFields(source_address[1], destination_address[1], "1", bytearray(message_to_send, encoding="UTF-8"))

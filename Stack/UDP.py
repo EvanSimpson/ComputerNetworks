@@ -8,115 +8,78 @@ def byteArrayToInt(data):
         val |= data[length-(i+1)] << (i*8)
     return val
 
-def encode_udp(udp_obj):
-    print("udp obj packet is " + str(udp_obj.packet))
-    return udp_obj.packet
+def encode_udp(param_tuple):
+    # param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
+    udp_obj = UDP(param_tuple[0], param_tuple[3], param_tuple[6])
+    udp_packet = udp_obj.packet
 
-def decode_udp(mac_obj):
-    print("in udp up")
-    ip_header = IPHeader()
-    ip_header.parseFields(mac_obj)
-    print("ip payload is " + str(ip_header._payload))
-    udp_header = UDPHeader()
-    udp_header.parseFields(ip_header._payload)
+    return (param_tuple[1], param_tuple[2], param_tuple[4], param_tuple[5], "A", udp_packet)
 
-    udp_obj = UDP(udp_header, ip_header=ip_header)
-    print(str(udp_obj))
-    return udp_obj
+def decode_udp(param_tuple):
+    # param_tuple = (srcLan, srcHost, destLan, destHost, packet)
+    udp_obj = UDP(param_tuple[4])
+
+    return (udp_obj.srcPort, param_tuple[0], param_tuple[1], udp_obj.destPort, param_tuple[2], param_tuple[3], udp_obj.payload)
+
+
+def encode_ip(param_tuple):
+    # param_tuple = (srcLan, srcHost, destLan, destHost, nextProtocol, payload)
+    ip_obj = IP(param_tuple[0], param_tuple[1], param_tuple[2], param_tuple[3], param_tuple[4], param_tuple[5])
+
+    return (ip_obj.srcLan+ip_obj.srcHost, ip_obj.destLan+ip_obj.destHost, ip_obj.packet)
+
+def decode_ip(packet):
+    ip = IP(packet)
+    
+    return (ip.srcLan, ip.srcHost, ip.destLan, ip.destHost, ip.payload)
 
 class UDP(object):
+    def __init__(self, srcPort, destPort=False, payload=False):
+        if destPort:
+            self.srcPort = srcPort
+            self.destPort = destPort
+            self.payload = payload
+            self.packet = self.srcPort + self.destPort + self.payload
+        else:
+            self.parse(srcPort)
 
-    def __init__(self, ip_header, srcAddr=False, destAddr=False, udp_header=False):
-        self.ip_header = ip_header
+        if len(self.srcPort) != 2 or len(self.destPort) != 2:
+            raise ValueError
 
-        print("in creating ip header")
-        if not srcAddr and not destAddr:
-            self.udp_header = udp_header
+    def parse(self, packet):
+        self.packet = packet
+        self.srcPort = packet[0:2]
+        self.destPort = packet[2:4]
+        self.payload = packet[4:]
 
-        elif not udp_header:
-            print("we don't have an udp header given to us")
-            self.udp_header = UDPHeader()
-            self.udp_header.setFields(srcAddr, destAddr, self.ip_header.serialize())
-            print(self.udp_header.serialize())
+class IP(object):
+    def __init__(self, srcLan, srcHost=False, destLan=False, destHost=False, nextProtocol=False, payload=False):
+        if srcHost:
+            self.srcLan = srcLan
+            self.srcHost = srcHost
+            self.destLan = destLan
+            self.destHost = destHost
+            self.nextProtocol = nextProtocol
+            self.cksum = checksum(bytearray(srcLan+srcHost+destLan+destHost+nextProtocol, encoding="UTF-8")).decode("UTF-8")
+            self.payload = payload
+            self.packet = srcLan + srcHost + destLan + destHost + nextProtocol + self.cksum + payload
+        else:
+            self.parse(srcLan)
 
-        self.packet = self.udp_header.serialize()
-
-    def __str__(self):
-        return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
-            "Source Port: " + str(self.udp_header._sourcePort) + "," \
-            "UDP Header Payload Length: " + str(len(self.udp_header._payload)) + "," \
-            "UDP Header Payload: " + str(self.udp_header._payload) + "," \
-            "Source Address: " + str(self.ip_header._sourceAddress) + "," \
-            "Destination Address: " + str(self.ip_header._destinationAddress) + "," \
-            "IP Header Payload: " + str(self.ip_header._payload)
-
-class IPHeader(object):
-    def __init__(self):
-        pass
-
-    def setFields(self, srcAddr, destAddr, protocol, udpPacket):
-        self._sourceAddress = bytearray(srcAddr, encoding="UTF-8")
-        self._destinationAddress = bytearray(destAddr, encoding="UTF-8")
-        self._nextProtocol = bytearray(protocol, encoding="UTF-8")
-        self._checklessHeader = self._sourceAddress + self._destinationAddress + self._nextProtocol
-        self._checksum = checksum(self._checklessHeader)
-        self._payload = udpPacket
-
-    def serialize(self):
-        print("source: " + str(type(self._sourceAddress)))
-        print("dest: " + str(type(self._destinationAddress)))
-        print("nextp: " + str(type(self._nextProtocol)))
-        print("chksum: " + str(type(self._checksum)))
-        print("payload: " + str(type(self._payload)))
-        packet = self._sourceAddress + self._destinationAddress + self._nextProtocol + self._checksum + self._payload
-        return packet
-
-    def parseFields(self, mac_obj):
-        # why are these addresses so long
-        print("the mac obj payload in parsefields is " + str(mac_obj.payload))
-        self._sourceAddress = mac_obj.payload[0:2]
-        self._destinationAddress = mac_obj.payload[2:4]
-        self._nextProtocol = mac_obj.payload[4]
-        self._checksum = mac_obj.payload[5:9]
-        self._payload = mac_obj.payload[9:]
-
-class UDPHeader(object):
-    def __init__(self):
-        pass
-
-    def setFields(self, sPort, dPort, payload):
-        '''
-            sPort is expected to be a string
-            dPort is expected to be a string
-            paylaod is expected to be a bytearray
-        '''
-        self._sourcePort = bytearray(sPort, encoding="UTF-8")
-        self._destinationPort = bytearray(dPort, encoding="UTF-8")
-        self._payload = payload
-
-    def serialize(self):
-        '''
-            Serialize the stored fields into a bytearray packet
-            to be passed down the stack
-        '''
-        return self._sourcePort + self._destinationPort + self._payload
-
-    def parseFields(self, data):
-        '''
-            Data is a bytearray of the entire incoming UDP packet
-        '''
-        self._sourcePort = data[0:2]
-        self._destinationPort = data[2:4]
-        self._payload = data[4:]
+    def parse(self, packet):
+        self.packet = packet
+        self.srcLan = packet[0:1]
+        self.srcHost = packet[1:2]
+        self.destLan = packet[2:3]
+        self.destHost = packet[3:4]
+        self.nextProtocol = packet[4:5]
+        self.cksum = packet[5:9]
+        self.payload = packet[9:]
 
 
 if __name__ == "__main__":
-    udp = UDPHeader()
-    udp.setFields('01', '02', bytearray('hello there', 'UTF-8'))
-    print(udp.serialize())
-    udp.parseFields(udp.serialize())
-    print(udp.serialize())
+    packet = encode_ip(encode_udp(("01", "C", "1", "01", "C", "2", "HELLO")))
+    print(packet)
+    info = decode_udp(decode_ip(packet))
+    print(info)
 
-    header = IPHeader()
-    header.setFields('AC', 'BD', '1', udp.serialize())
-    print(header.serialize())
