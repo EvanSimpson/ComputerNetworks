@@ -49,7 +49,7 @@ def encode_message(message):
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
 	if type(message) is bytearray:
-		mac_obj = Mac("A", "B", '1', message)
+		mac_obj = Mac("0", "0", '0', message)
 	else:
 		mac_obj = message
 	return mac_obj.create_message()

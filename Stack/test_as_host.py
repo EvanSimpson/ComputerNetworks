@@ -1,0 +1,17 @@
+from stack import Stack
+
+def test_as_host():
+	stack = Stack()
+
+	source_address = ("C1", "19")
+	destination_address =  ("C1", "19")
+	
+	while True:
+		message = input("type a message (type q to quit): ")
+		if message == "q":
+			break
+		#print(message)
+		stack.send_message_over_gpio(source_address, destination_address, message)
+
+if __name__ == "__main__":
+	test_as_host()

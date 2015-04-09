@@ -26,7 +26,7 @@ LANs = {
 	"D" : "127.0.0.1"
 	}
 
-class RouterStack():
+class Stack():
 
 	def __init__(self, is_router=False):
 		self.is_router = is_router
@@ -55,9 +55,9 @@ class RouterStack():
 		self.gpio_address = (localhost, gpioport)
 		self.stack_address = (localhost, ownport)
 
-		if is_router:
+		if self.is_router:
 			self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			self.switch_socket.bind((self.stack_address)
+			self.switch_socket.bind((self.stack_address))
 		else:
 			self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			self.game_server_socket.bind(self.stack_address)
@@ -70,7 +70,7 @@ class RouterStack():
 	def receive_input(self):
 		while True:
 			self.receive_over_gpio()
-			if is_router:
+			if self.is_router:
 				self.receive_over_switch()
 			else:
 				self.receive_from_games()
@@ -99,7 +99,7 @@ class RouterStack():
 			self.handle_input_from_gpio(incoming, gpio_address)
 		except:
 			self.gpio_server_socket.close()
-			if is_router:
+			if self.is_router:
 				self.switch_socket.close()
 			else:
 				self.game_server_socket.close()
@@ -125,7 +125,7 @@ class RouterStack():
 		self.active_game_ports[port_letter] = client_address
 	
 	def handle_input_from_gpio(self, message_received, incoming_address):
-		if is_router:
+		if self.is_router:
 			mac_obj = self.internal_stack.ascend(message_received.decode("UTF-8"))
 			self.route_message(mac_obj)
 		else:
@@ -162,6 +162,7 @@ class RouterStack():
 			else:
 				self.send_message_externally(udp_input)
 		else:
+			pass
 			#ignore message, does this mean we do anything?
 
 	def send_message_internally(self, udp_input): 
