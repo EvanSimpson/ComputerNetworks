@@ -191,10 +191,10 @@ class Stack():
 		print("source address: "+ source_mac_address)
 		print("dest address: " + destination_mac_address)
 		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
-		print("udp header payload is " + udp_input.udp_header._payload)
-		print("packet is " + udp_input.packet)
+		print("udp header payload is " + str(udp_input.udp_header._payload))
+		print("packet is " + str(udp_input.packet))
 		message_in_bin = self.internal_stack.descend()
-		print("message in bin is: " + message_in_bin)
+		print("message in bin is: " + str(message_in_bin))
 		#does the socket want a bytearray or a string?
 		try:
 			gpio_server_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
