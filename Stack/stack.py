@@ -191,7 +191,8 @@ class Stack():
 		print("source address: "+ source_mac_address)
 		print("dest address: " + destination_mac_address)
 		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
-		print(mac_obj.payload)
+		print("udp header payload is " + udp_input.udp_header._payload)
+		print("packet is " + udp_input.packet)
 		message_in_bin = self.internal_stack.descend()
 		print("message in bin is: " + message_in_bin)
 		#does the socket want a bytearray or a string?
