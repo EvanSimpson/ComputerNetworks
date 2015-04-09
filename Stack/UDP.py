@@ -21,7 +21,7 @@ def decode_udp(mac_obj):
     udp_header.parseFields(ip_header._payload)
 
     udp_obj = UDP(udp_header, ip_header=ip_header)
-
+    print(str(udp_obj))
     return udp_obj
 
 class UDP(object):
