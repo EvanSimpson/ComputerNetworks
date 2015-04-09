@@ -29,12 +29,14 @@ class UDP(object):
         self.udp_header = udp_header
         self.packet = self.udp_header.serialize()
 
+        print("in creating ip header")
         if not srcAddr and not destAddr:
             self.ip_header = ip_header
 
         elif not ip_header:
+            print("we don't have an ip header given to us")
             self.ip_header = IPHeader()
-            self.ip_header.setFields(srcAddr, destAddr, '1', self.packet)
+            self.ip_header.setFields(srcAddr, destAddr, "1", self.packet)
 
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
