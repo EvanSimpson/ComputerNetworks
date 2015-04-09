@@ -16,7 +16,7 @@ def decode_udp(mac_obj):
     print("in udp up")
     ip_header = IPHeader()
     ip_header.parseFields(mac_obj)
-
+    print("ip payload is " + str(ip_header._payload))
     udp_header = UDPHeader()
     udp_header.parseFields(ip_header._payload)
 
