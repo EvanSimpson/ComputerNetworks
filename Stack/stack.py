@@ -160,8 +160,11 @@ class Stack():
 		# and send it to the 
 		
 		if mac_obj.destination is router_mac:
+			print("mac destination is router")
 			udp_input = self.external_stack.ascend(mac_obj)
+			print("the lan is: " + str(udp_input.ip_header._destinationAddress[0]))
 			if udp_input.ip_header._destinationAddress[0] == local_lan:
+				print("the lan is the local lan")
 				self.send_message_internally(udp_input)
 			else:
 				self.send_message_externally(udp_input)
@@ -171,6 +174,7 @@ class Stack():
 
 	def send_message_internally(self, udp_input): 
 		#send the message over the gpio to the pi corresponding with dest_client
+		print("in send message internally")
 		destination_host_ip = udp_input.ip_header._destinationAddress[1]
 		destination_mac_address = local_mac_addresses[destination_host_ip]
 		if udp_input.ip_header._sourceAddress[0] is local_lan:
@@ -182,9 +186,10 @@ class Stack():
 		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
 
 		message_in_bin = self.internal_stack.descend()
+		print("message in bin is: " + message_in_bin)
 		#does the socket want a bytearray or a string?
 		try:
-			gpio_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
+			gpio_server_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
 		except:
 			pass
 
