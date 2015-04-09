@@ -186,7 +186,7 @@ class Stack():
 			source_mac_address = local_mac_addresses[source_host_ip]
 		else:
 			source_mac_address = router_mac
-
+		print("made it down here")
 		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
 
 		message_in_bin = self.internal_stack.descend()
