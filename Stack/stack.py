@@ -247,6 +247,7 @@ class Stack():
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		ip_header = IPHeader()
+		print(type(message_to_send))
 		ip_header.setFields(source_address[1], destination_address[1], "1", message_to_send)
 		# udp_header = UDPHeader()
 		# udp_header.setFields(source_address[0], destination_address[0], bytearray(message_to_send, encoding="UTF-8"))
