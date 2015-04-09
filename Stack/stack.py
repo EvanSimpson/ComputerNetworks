@@ -163,19 +163,13 @@ class Stack():
 		# and send it to the 
 		print("in route message")
 		print("mac destination is " + mac_obj.dest)
-		try:
-			int(mac_obj.dest)
+		udp_input = self.external_stack.descend(mac_obj)
+		if mac_obj.dest == "0":
 			print("mac destination is router")
-			udp_input = self.external_stack.descend(mac_obj)
-			if udp_input[4] == local_lan:
-				print("the lan is the local lan")
-				self.send_message_internally(udp_input)
-			else:
-				self.send_message_externally(udp_input)
-		except:
-			print("the mac dest is not the router mac dest (0)")
-			pass
-			#ignore message, does this mean we do anything?
+			self.send_message_externally(udp_input)
+		else:
+			print("the lan is the local lan")
+			self.send_message_internally(udp_input)
 
 	def send_message_internally(self, udp_input): 
 		#send the message over the gpio to the pi corresponding with dest_client
