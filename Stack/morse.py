@@ -27,8 +27,9 @@ def bin2message(bin_message):
   if words[len(words)-1] == "":
       words.pop()
   bin_letters = [word.split('000') for word in words]
-
-  return ' '.join(map(bin2morse, bin_letters))
+  ret = ' '.join(map(bin2morse, bin_letters))
+  print(ret)
+  return ret
 
 def message2bin(message):
   '''

@@ -28,8 +28,8 @@ def encode_ip(param_tuple):
 
     return (ip_obj.srcLan+ip_obj.srcHost, ip_obj.destLan+ip_obj.destHost, ip_obj.packet)
 
-def decode_ip(packet):
-    ip = IP(packet)
+def decode_ip(mac_obj):
+    ip = IP(mac_obj.payload)
     
     return (ip.srcLan, ip.srcHost, ip.destLan, ip.destHost, ip.payload)
 

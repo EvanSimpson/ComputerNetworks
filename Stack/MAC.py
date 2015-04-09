@@ -15,7 +15,7 @@ def encode_mac(param_tuple):
 def decode_mac(packet):
 	mac_obj = MAC(packet)
 	# (srcLan, srcHost, destLan, destHost, packet)
-	return mac_obj.payload
+	return mac_obj
 
 class MAC(object):
 	def __init__(self, src, dest=False, payload=False):
@@ -29,9 +29,9 @@ class MAC(object):
 
 	def parse(self, packet):
 		self.packet = packet
-		self.src = packet[0]
-		self.dest = packet[1]
-		self.payload = packet[2:]
+		self.src = packet[0:2]
+		self.dest = packet[2:4]
+		self.payload = packet[4:]
 
 
 if __name__ == "__main__":
