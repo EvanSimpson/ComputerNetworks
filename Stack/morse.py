@@ -6,11 +6,11 @@ def morse_up(bin_input):
 def morse_down(bytearray_input):
   return bytearray2bin(bytearray_input)
 
-def bytearray2bin(bytearray_message):
+def bytearray2bin(string_message):
   '''
-    takes a message as a bytearray and turns it into binary
+    takes a message as a string and turns it into binary
   '''
-  return message2bin(''.join([chr(b) for b in bytearray_message]))
+  return message2bin(string_message)
 
 def bin2bytearray(bin_message):
   '''
