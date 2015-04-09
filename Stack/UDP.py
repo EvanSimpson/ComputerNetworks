@@ -37,6 +37,7 @@ class UDP(object):
             print("we don't have an ip header given to us")
             self.ip_header = IPHeader()
             self.ip_header.setFields(srcAddr, destAddr, "1", self.packet)
+            print(self.ip_header.serialize())
 
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
