@@ -44,11 +44,14 @@ class Mac():
 		'''
 		return ''.join(['%08d'%int(bin(ord(i))[2:]) for i in self.payload])
 
-def encode_message(ip_bytearray):
+def encode_message(message):
 	'''
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
-	mac_obj = Mac("A", "B", '1', ip_bytearray)
+	if type(message) is bytearray:
+		mac_obj = Mac("A", "B", '1', message)
+	else:
+		mac_obj = message
 	return mac_obj.create_message()
 
 def decode_message(mac_bytearray):
@@ -63,7 +66,8 @@ def decode_message(mac_bytearray):
 	payload = mac_bytearray[3:len(mac_bytearray) - 2]
 	checksum = mac_bytearray[-2:]
 
-	return Mac(destination, source, next_protocol, payload)
+	mac_obj = Mac(destination, source, next_protocol, payload)
+	return mac_obj
 
 if __name__ == "__main__":
 
