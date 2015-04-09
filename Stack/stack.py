@@ -96,6 +96,7 @@ class Stack():
 	def receive_over_gpio(self):
 		try:
 			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
+			print(incoming)
 			self.handle_input_from_gpio(incoming, gpio_address)
 		except:
 			self.gpio_server_socket.close()
@@ -130,7 +131,7 @@ class Stack():
 			self.route_message(mac_obj)
 		else:
 			udp_input = self.full_stack.ascend(message_received)
-			self.send_message_to_application(udp_input)
+			#self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
 		destination_port = udp_input.udp_header._destinationPort
