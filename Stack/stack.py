@@ -161,7 +161,7 @@ class Stack():
 		# and send it to the 
 		print("in route message")
 		print("mac destination is " + str(mac_obj.destination))
-		if mac_obj.destination is router_mac:
+		if mac_obj.destination.decode("UTF-8") is router_mac:
 			print("mac destination is router")
 			udp_input = self.external_stack.ascend(mac_obj)
 			print("the lan is: " + str(udp_input.ip_header._destinationAddress[0]))
