@@ -180,7 +180,9 @@ class Stack():
 		#send the message over the gpio to the pi corresponding with dest_client
 		print("in send message internally")
 		destination_host_ip = udp_input.ip_header._destinationAddress[1]
-		destination_mac_address = local_mac_addresses[destination_host_ip]
+		destination_mac_address = local_mac_addresses[destination_host_ip.decode("UTF-8")]
+		print("dest mac address: " + destination_mac_address)
+		
 		if udp_input.ip_header._sourceAddress[0] is local_lan:
 			source_host_ip = udp_input.ip_header._sourceAddress[1]
 			source_mac_address = local_mac_addresses[source_host_ip]
