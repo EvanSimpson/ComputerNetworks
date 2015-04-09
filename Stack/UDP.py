@@ -9,6 +9,7 @@ def byteArrayToInt(data):
     return val
 
 def encode_udp(udp_obj):
+    print("udp obj packet is " + str(udp_obj.packet))
     return udp_obj.packet
 
 def decode_udp(mac_obj):
@@ -25,19 +26,20 @@ def decode_udp(mac_obj):
 
 class UDP(object):
 
-    def __init__(self, udp_header, srcAddr=False, destAddr=False, ip_header=False):
-        self.udp_header = udp_header
-        self.packet = self.udp_header.serialize()
+    def __init__(self, ip_header, srcAddr=False, destAddr=False, udp_header=False):
+        self.ip_header = ip_header
 
         print("in creating ip header")
         if not srcAddr and not destAddr:
-            self.ip_header = ip_header
+            self.udp_header = udp_header
 
-        elif not ip_header:
-            print("we don't have an ip header given to us")
-            self.ip_header = IPHeader()
-            self.ip_header.setFields(srcAddr, destAddr, "1", self.packet)
-            print(self.ip_header.serialize())
+        elif not udp_header:
+            print("we don't have an udp header given to us")
+            self.udp_header = UDPHeader()
+            self.udp_header.setFields(srcAddr, destAddr, self.packet)
+            print(self.udp_header.serialize())
+
+        self.packet = self.udp_header.serialize()
 
     def __str__(self):
         return "[ Destination Port: " + str(self.udp_header._destinationPort) + "," \
