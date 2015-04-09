@@ -1,13 +1,14 @@
 from codes import *
 
-def morse_up(input):
+def morse_up(bin_input):
   print("in morse up")
-  b = bin2bytearray(input)
+  print("input is " + bin_input)
+  b = bin2bytearray(bin_input)
   print(b)
   return b
 
-def morse_down(input):
-  return bytearray2bin(input)
+def morse_down(bytearray_input):
+  return bytearray2bin(bytearray_input)
 
 def bytearray2bin(bytearray_message):
   '''
