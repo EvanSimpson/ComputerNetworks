@@ -243,8 +243,8 @@ class Stack():
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
-		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding="UTF-8"))
-		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
+		udp_header.setFields(source_address[0], destination_address[0], bytearray(message_to_send, encoding="UTF-8"))
+		return UDP(udp_header, srcAddr=source_address[1], destAddr=destination_address[1])
 	
 if __name__ == "__main__":
 	print("nothing yet")
