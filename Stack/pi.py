@@ -35,7 +35,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01, debug=False)
 		if counter >= 8:
 			break
 		time.sleep(duration)
-	prepare_pins_out()
+	prepare_pins_out(data_pin, carrier_pin)
 	turn_high(carrier_pin)
 	for i in range(len(data)):
 		if debug:
