@@ -153,13 +153,13 @@ class Stack():
 			except:
 				pass
 
-	def route_message(self, udp_input):
+	def route_message(self, mac_obj):
 		# check the mac address, if it is for the router
 		# then take it up the stack and figure out 
 		# if it is for out lan and if so, what the IP is
 		# then recreate the packet with the proper ip
 		# and send it to the 
-		
+		print("mac destination is " + mac_obj.destination)
 		if mac_obj.destination is router_mac:
 			print("mac destination is router")
 			udp_input = self.external_stack.ascend(mac_obj)
@@ -170,6 +170,7 @@ class Stack():
 			else:
 				self.send_message_externally(udp_input)
 		else:
+			print("the mac dest is not the router mac dest (0)")
 			pass
 			#ignore message, does this mean we do anything?
 
