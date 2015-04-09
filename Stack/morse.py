@@ -2,7 +2,9 @@ from codes import *
 
 def morse_up(input):
   print("in morse up")
-  return bin2bytearray(input)
+  b = bin2bytearray(input)
+  print(b)
+  return b
 
 def morse_down(input):
   return bytearray2bin(input)

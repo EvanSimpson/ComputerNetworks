@@ -131,7 +131,6 @@ class Stack():
 			mac_obj = self.internal_stack.ascend(message_received.decode("UTF-8"))
 			self.route_message(mac_obj)
 		else:
-			print("about to do the stack")
 			udp_input = self.full_stack.ascend(message_received)
 			print(udp_input.packet)
 			#self.send_message_to_application(udp_input)
