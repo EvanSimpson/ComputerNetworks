@@ -63,6 +63,7 @@ class IPHeader(object):
 
     def parseFields(self, mac_obj):
         # why are these addresses so long
+        print("the mac obj payload in parsefields is " + str(mac_obj.payload))
         self._sourceAddress = mac_obj.payload[0:2]
         self._destinationAddress = mac_obj.payload[2:4]
         self._nextProtocol = mac_obj.payload[4]
