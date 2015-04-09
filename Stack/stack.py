@@ -131,6 +131,7 @@ class Stack():
 			self.route_message(mac_obj)
 		else:
 			udp_input = self.full_stack.ascend(message_received)
+			print(udp_input.packet)
 			#self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
