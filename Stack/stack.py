@@ -182,16 +182,16 @@ class Stack():
 		destination_host_ip = udp_input.ip_header._destinationAddress[1]
 		print("destination host ip is " + chr(destination_host_ip))
 		destination_mac_address = local_mac_addresses[chr(destination_host_ip)]
-		print("dest mac address: " + str(destination_mac_address))
 
 		if udp_input.ip_header._sourceAddress[0] is local_lan:
 			source_host_ip = udp_input.ip_header._sourceAddress[1]
 			source_mac_address = local_mac_addresses[source_host_ip]
 		else:
 			source_mac_address = router_mac
-		print("made it down here")
+		print("source address: "+ source_mac_address)
+		print("dest address: " + destination_mac_address)
 		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
-
+		print(mac_obj.payload)
 		message_in_bin = self.internal_stack.descend()
 		print("message in bin is: " + message_in_bin)
 		#does the socket want a bytearray or a string?
