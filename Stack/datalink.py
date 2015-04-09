@@ -60,6 +60,7 @@ def decode_message(mac_bytearray):
 	verifies that the payload has been properly transmitted,
 	and outputs the verified mac object
 	'''
+	print("in datalink up")
 	destination = mac_bytearray[0:1]
 	source = mac_bytearray[1:2]
 	next_protocol = mac_bytearray[2:3]
