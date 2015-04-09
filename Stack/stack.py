@@ -36,7 +36,7 @@ class RouterStack():
 			"close": self.joesocket_close,
 			"sendto": self.joesocket_sendto
 		}
-		
+
 		self.setup_bj()
 		self.setup_servers()
 
@@ -178,14 +178,20 @@ class RouterStack():
 
 		message_in_bin = self.internal_stack.descend()
 		#does the socket want a bytearray or a string?
-		gpio_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
+		try:
+			gpio_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
+		except:
+			pass
 
 	def send_message_externally(self, udp_input):
 		destination_lan_ip = LANs[udp_input.ip_header._destinationAddress[0]]
 
 		serialized_udp_packet = self.external_stack.descend(udp_input)
 		#to_send should be a bytearray but I'm not suuure
-		self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
+		try:
+			self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
+		except: 
+			pass
 
 	# functions called on joesocket commands
 
@@ -205,7 +211,10 @@ class RouterStack():
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
-		self.game_server_socket.sendto(return_message, client_address)
+		try:
+			self.game_server_socket.sendto(return_message, client_address)
+		except:
+			pass
 
 	#sending data over gpio based on input from joesocket
 
@@ -213,7 +222,10 @@ class RouterStack():
 		udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
 		to_transmit_string = self.stack.descend(udp_obj)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
-		self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
+		try:
+			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
+		except:
+			pass
 
 	def initialize_udp(self, source_address, destination_address, message_to_send):
 		udp_header = UDPHeader()
