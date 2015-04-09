@@ -36,7 +36,8 @@ class UDP(object):
         elif not udp_header:
             print("we don't have an udp header given to us")
             self.udp_header = UDPHeader()
-            self.udp_header.setFields(srcAddr, destAddr, bytearray(self.ip_header.serialize(), encoding="UTF-8"))
+            print(type(srcAddr))
+            self.udp_header.setFields(srcAddr.decode("UTF-8"), destAddr.decode("UTF-8"), self.ip_header.serialize())
             print(self.udp_header.serialize())
 
         self.packet = self.udp_header.serialize()
