@@ -23,7 +23,7 @@ def turn_low(pin):
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, data_pin = 18, carrier_pin = 23, duration = .1, debug=False):
+def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.02, debug=False):
 	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
 	while(True):
@@ -49,7 +49,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .1, debug=False):
 	time.sleep(duration)
 	turn_low(carrier_pin)
 
-def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.1, debug=False):
+def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.02, debug=False):
 	prepare_pins_in(data_pin, carrier_pin)
 	times = []
 	def data_callback(channel):
@@ -73,7 +73,7 @@ def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.1, debug=
 			lock.acquire(blocking=True)
 	lock.release()
 
-def receive_no_lock(data_pin=18, carrier_pin=23, duration=0.1, debug=True):
+def receive_no_lock(data_pin=18, carrier_pin=23, duration=0.02, debug=True):
 	prepare_pins_in(data_pin, carrier_pin)
 	times = []
 	def data_callback(channel):
