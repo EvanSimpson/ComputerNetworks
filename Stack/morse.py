@@ -48,6 +48,7 @@ def bin2morse(letters):
     letters is a list of binary letters
   '''
   print("more 3")
+  print("letters: " + str(letters))
   print(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
   return morse2letters(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
 
@@ -87,3 +88,7 @@ def word2letters(word):
     letters.remove(letter)
 
   return '00'.join(map(letter2morse, letters))+'00'
+
+if __name__ == "__main__":
+  binary = morse_down(bytearray("hello", encoding="UTF-8"))
+  out = morse_up(binary)
