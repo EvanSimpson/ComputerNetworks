@@ -1,15 +1,15 @@
 import RPi.GPIO as GPIO
 import time
 
-def prepare_pins_in(data_pin = 18,carrier_pin = 23):
+def prepare_pins_in(*argv):
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(carrier_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
-	GPIO.setup(data_pin,GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+	for pin in argv:
+		GPIO.setup(pin, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
-def prepare_pins_out(data_pin = 18,carrier_pin = 23):
+def prepare_pins_out(*argv):
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(carrier_pin,GPIO.OUT)
-	GPIO.setup(data_pin,GPIO.OUT)
+	for pin in argv:
+		GPIO.setup(pin,GPIO.OUT)
 
 def kill():
 	GPIO.cleanup()
@@ -23,7 +23,7 @@ def turn_low(pin):
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
+def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01, debug=False):
 	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
 	while(True):
@@ -38,6 +38,8 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
 	prepare_pins_out()
 	turn_high(carrier_pin)
 	for i in range(len(data)):
+		if debug:
+			print(data[i])
 		if data[i]=="1":
 			turn_high(data_pin)
 		else:
@@ -47,7 +49,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = .01):
 	time.sleep(duration)
 	turn_low(carrier_pin)
 
-def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01):
+def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01, debug=False):
 	prepare_pins_in(data_pin, carrier_pin)
 	times = []
 	def data_callback(channel):
@@ -56,19 +58,39 @@ def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.01):
 		times.append(time.time())
 		if not read_pin(carrier_pin):
 			times.append(-1)
-		print("Carrier")
+			if debug:
+				print("Carrier down")
+		elif debug:
+			print("Carrier up")
 	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
 	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
 	if lock.acquire():
 		while(recv_flag.flag):
 			lock.release()
 			if (len(times)>0) and (times[-1] ==-1):
-				x = process(times[:-1], duration)
-				print(x)
-				yield x #process(times[:-1], duration)
+				yield process(times[:-1], duration)
 				times = []
 			lock.acquire(blocking=True)
 	lock.release()
+
+def receive_no_lock(data_pin=18, carrier_pin=23, duration=0.01, debug=True):
+	prepare_pins_in(data_pin, carrier_pin)
+	times = []
+	def data_callback(channel):
+		times.append(time.time())
+	def carrier_callback(channel):
+		times.append(time.time())
+		if not read_pin(carrier_pin):
+			times.append(-1)
+			if debug:
+				print("Carrier down")
+		elif debug:
+			print("Carrier up")
+	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
+	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
+	while True:
+		if len(times)>0 and times[-1] == -1:
+			return process(times[:-1], duration)
 
 def process(times, duration):
 	binput = ""
@@ -91,7 +113,6 @@ def process(times, duration):
 	return binput[1:-1]
 
 if __name__ == "__main__":
-	transmit("11101010001000000010111")
-	#data = receive()
-	#print(next(data))
-	kill()
+	while True:
+		print(receive_no_lock())
+		kill()
