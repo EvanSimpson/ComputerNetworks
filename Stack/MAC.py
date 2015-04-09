@@ -9,7 +9,7 @@ def encode_mac(param_tuple):
 	src_mac = MAC_TABLE.get(param_tuple[0], "0")
 	dest_mac = MAC_TABLE.get(param_tuple[1], "0")
 	
-	mac_obj = MAC(param_tuple[0], param_tuple[1], param_tuple[2])
+	mac_obj = MAC(src_mac, dest_mac, param_tuple[2])
 	return mac_obj.packet
 
 def decode_mac(packet):
@@ -29,9 +29,9 @@ class MAC(object):
 
 	def parse(self, packet):
 		self.packet = packet
-		self.src = packet[0:2]
-		self.dest = packet[2:4]
-		self.payload = packet[4:]
+		self.src = packet[0]
+		self.dest = packet[1]
+		self.payload = packet[2:]
 
 
 if __name__ == "__main__":
