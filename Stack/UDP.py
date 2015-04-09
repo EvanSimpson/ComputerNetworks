@@ -63,6 +63,11 @@ class IPHeader(object):
         self._payload = udpPacket
 
     def serialize(self):
+        print("source: " + str(type(self._sourceAddress)))
+        print("dest: " + str(type(self._destinationAddress)))
+        print("nextp: " + str(type(self._nextProtocol)))
+        print("chksum: " + str(type(self._checksum)))
+        print("payload: " + str(type(self._payload)))
         packet = self._sourceAddress + self._destinationAddress + self._nextProtocol + self._checksum + self._payload
         return packet
 
