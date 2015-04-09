@@ -57,7 +57,7 @@ class Stack():
 
 		if self.is_router:
 			self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-			self.switch_socket.bind((self.stack_address))
+			self.switch_socket.bind(self.stack_address)
 		else:
 			self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			self.game_server_socket.bind(self.stack_address)
@@ -86,7 +86,7 @@ class Stack():
 
 	def receive_over_switch():
 		try:
-			(incoming, socket_server_address) = switch_socket.recvfrom(1024)
+			(incoming, socket_server_address) = self.switch_socket.recvfrom(1024)
 			self.handle_input_from_switch(incoming, socket_server_address)
 		except:
 			self.gpio_server_socket.close()
@@ -95,7 +95,7 @@ class Stack():
 
 	def receive_over_gpio(self):
 		try:
-			(incoming, gpio_address) = gpio_server_socket.recvfrom(1024)
+			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
 			self.handle_input_from_gpio(incoming, gpio_address)
 		except:
 			self.gpio_server_socket.close()
