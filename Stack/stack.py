@@ -133,7 +133,7 @@ class Stack():
 			mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
 			print(mac_payload)
 			print("just printed mac_obj")
-			self.route_message(mac_obj)
+			self.route_message(mac_payload)
 		else:
 			udp_input = self.full_stack.ascend(message_received)
 			print(udp_input.packet)
@@ -162,13 +162,11 @@ class Stack():
 		# then recreate the packet with the proper ip
 		# and send it to the 
 		print("in route message")
-		print("mac destination is " + mac_obj.destination.decode("UTF-8"))
-		print(type(mac_obj.destination))
-		if int(mac_obj.destination.decode("UTF-8")) is 0:
+		print("mac destination is " + mac_obj.dest)
+		if int(mac_obj.dest) is 0:
 			print("mac destination is router")
-			udp_input = self.external_stack.ascend(mac_obj)
-			print(chr(udp_input.ip_header._destinationAddress[0]))
-			if chr(udp_input.ip_header._destinationAddress[0]) == local_lan:
+			udp_input = self.external_stack.descend(mac_obj)
+			if chr(udp_input[4]) == local_lan:
 				print("the lan is the local lan")
 				self.send_message_internally(udp_input)
 			else:
