@@ -9,7 +9,7 @@ def byteArrayToInt(data):
     return val
 
 def encode_udp(udp_obj):
-    return udp_obj.ip_header.serialize()
+    return udp_obj.packet
 
 def decode_udp(mac_obj):
     ip_header = IPHeader()

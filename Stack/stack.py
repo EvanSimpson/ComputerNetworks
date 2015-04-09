@@ -7,14 +7,36 @@ from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
 
 localhost = '127.0.0.1'
-ownport = 5000
+routerport = 2048 #do we need this?
+ownport = 5000 #do we need this?
 authorityport = 5002
 gpioport = 5003
+local_lan = "C"
+router_mac = "0"
+local_mac_addresses = {
+	"1" : "X",
+	"2" : "Y",
+	"3" : "Z"
+	}
 
-class Stack():
+LANs = {
+	"A" : "127.0.0.1",
+	"B" : "127.0.0.1",
+	"C" : "127.0.0.1",
+	"D" : "127.0.0.1"
+	}
 
-	def __init__(self):
+class RouterStack():
+
+	def __init__(self, is_router=False):
+		self.is_router = is_router
 		self.active_game_ports = {}
+		self.joesocket_commands = {
+			"bind": self.joesocket_bind,
+			"close": self.joesocket_close,
+			"sendto": self.joesocket_sendto
+		}
+		
 		self.setup_bj()
 		self.setup_servers()
 
@@ -25,53 +47,71 @@ class Stack():
 		mac_layer = BJ(encode_message, decode_message)
 		udp_layer = BJ(encode_udp, decode_udp)
 
-		self.joesocket_commands = {
-			"bind": self.joesocket_bind,
-			"close": self.joesocket_close,
-			"sendto": self.joesocket_sendto
-		}
-
-		self.stack = BJ_Stack([udp_layer, mac_layer, morse_layer])
+		self.internal_stack = BJ_Stack([mac_layer, morse_layer])
+		self.external_stack = BJ_Stack([udp_layer])
+		self.full_stack = BJ_Stack([udp_layer, mac_layer, morse_layer])
 
 	def setup_servers(self):
 		self.gpio_address = (localhost, gpioport)
 		self.stack_address = (localhost, ownport)
 
-		self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		self.game_server_socket.bind(self.stack_address)
+		if is_router:
+			self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			self.switch_socket.bind((self.stack_address)
+		else:
+			self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			self.game_server_socket.bind(self.stack_address)
 
 		self.gpio_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.gpio_server_socket.sendto(bytearray(0x01), self.gpio_address)
 
-	#listening out over joesocket and gpio
+	#listening for input over switch and gpio
 
-	def listen_for_input(self):
+	def receive_input(self):
 		while True:
+			self.receive_over_gpio()
+			if is_router:
+				self.receive_over_switch()
+			else:
+				self.receive_from_games()
 
-			try:
-				self.listen_over_gpio()
-			except:
-				self.gpio_server_socket.close()
+	def receive_from_games(self):
+		try:
+			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
+			self.handle_input_from_client(input_from_client, client_address)
+		except:
+			self.gpio_server_socket.close()
+			self.game_server_socket.close()
+			sys.exit()
+
+	def receive_over_switch():
+		try:
+			(incoming, socket_server_address) = switch_socket.recvfrom(1024)
+			self.handle_input_from_switch(incoming, socket_server_address)
+		except:
+			self.gpio_server_socket.close()
+			self.switch_socket.close()
+			sys.exit()
+
+	def receive_over_gpio(self):
+		try:
+			(incoming, gpio_address) = gpio_server_socket.recvfrom(1024)
+			self.handle_input_from_gpio(incoming, gpio_address)
+		except:
+			self.gpio_server_socket.close()
+			if is_router:
+				self.switch_socket.close()
+			else:
 				self.game_server_socket.close()
-				sys.exit()
-
-			try:
-				self.listen_for_games()
-			except:
-				self.gpio_server_socket.close()
-				self.game_server_socket.close()
-				sys.exit()
-
-	def listen_over_gpio(self):
-		(incoming, gpio_server_address) = self.gpio_server_socket.recvfrom(1024)
-		self.handle_input_from_gpio(incoming)
-
-
-	def listen_for_games(self):
-		(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
-		self.handle_input_from_client(input_from_client, client_address)
-
+			sys.exit()
+	
 	#handling inputs
+
+	def handle_input_from_switch(self, message_received, incoming_address):
+		dummy_mac = Mac("0", "0", "0", message_received.decode("UTF-8"))
+		
+		udp_input = self.external_stack.ascend(dummy_mac)
+		self.route_message(udp_input)
 
 	def handle_input_from_client(self, message_bytearray, client_address):
 
@@ -81,12 +121,18 @@ class Stack():
 
 		self.joesocket_commands[parsed_message['command']](**parsed_message['params'])
 
-
 	def add_new_client(self, port_letter, client_address):
 		self.active_game_ports[port_letter] = client_address
+	
+	def handle_input_from_gpio(self, message_received, incoming_address):
+		if is_router:
+			mac_obj = self.internal_stack.ascend(message_received.decode("UTF-8"))
+			self.route_message(mac_obj)
+		else:
+			udp_input = self.full_stack.ascend(message_received)
+			self.send_message_to_application(udp_input)
 
-	def handle_input_from_gpio(self, message_received):
-		udp_input = self.stack.ascend(message_received)
+	def send_message_to_application(self, udp_input):
 		destination_port = udp_input.udp_header._destinationPort
 		if destination_port in self.active_game_ports:
 			destination_address = self.active_game_ports[destination_port]
@@ -95,7 +141,51 @@ class Stack():
 			source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
 
 			to_send = json.dumps([{'payload': payload, 'address': source}])
-			game_server_socket.sendto(to_send, destination_address)
+			
+			try:
+				game_server_socket.sendto(to_send, destination_address)
+			
+			except:
+				pass
+
+	def route_message(self, udp_input):
+		# check the mac address, if it is for the router
+		# then take it up the stack and figure out 
+		# if it is for out lan and if so, what the IP is
+		# then recreate the packet with the proper ip
+		# and send it to the 
+		
+		if mac_obj.destination is router_mac:
+			udp_input = self.external_stack.ascend(mac_obj)
+			if udp_input.ip_header._destinationAddress[0] == local_lan:
+				self.send_message_internally(udp_input)
+			else:
+				self.send_message_externally(udp_input)
+		else:
+			#ignore message, does this mean we do anything?
+
+	def send_message_internally(self, udp_input): 
+		#send the message over the gpio to the pi corresponding with dest_client
+		destination_host_ip = udp_input.ip_header._destinationAddress[1]
+		destination_mac_address = local_mac_addresses[destination_host_ip]
+		if udp_input.ip_header._sourceAddress[0] is local_lan:
+			source_host_ip = udp_input.ip_header._sourceAddress[1]
+			source_mac_address = local_mac_addresses[source_host_ip]
+		else:
+			source_mac_address = router_mac
+
+		mac_obj = Mac(destination_mac_address, source_mac_address, "1", udp_input.packet)
+
+		message_in_bin = self.internal_stack.descend()
+		#does the socket want a bytearray or a string?
+		gpio_socket.sendto(bytearray(message_in_bin, encoding="UTF-8"), (localhost, port))
+
+	def send_message_externally(self, udp_input):
+		destination_lan_ip = LANs[udp_input.ip_header._destinationAddress[0]]
+
+		serialized_udp_packet = self.external_stack.descend(udp_input)
+		#to_send should be a bytearray but I'm not suuure
+		self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
 
 	# functions called on joesocket commands
 
@@ -129,8 +219,6 @@ class Stack():
 		udp_header = UDPHeader()
 		udp_header.setFields(source_address[1], destination_address[1], bytearray(message_to_send, encoding="UTF-8"))
 		return UDP(udp_header, srcAddr=source_address[0], destAddr=destination_address[0])
-
+	
 if __name__ == "__main__":
-	stack = Stack()
-	stack.send_message_over_gpio("hello world")
-	stack.listen_for_input()
+	print("nothing yet")
