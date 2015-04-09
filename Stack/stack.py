@@ -165,8 +165,8 @@ class Stack():
 		if int(mac_obj.destination.decode("UTF-8")) is 0:
 			print("mac destination is router")
 			udp_input = self.external_stack.ascend(mac_obj)
-			print("the lan is: " + str(udp_input.ip_header._destinationAddress[0]))
-			if udp_input.ip_header._destinationAddress[0] == local_lan:
+			print(udp_input.ip_header._destinationAddress[0])
+			if udp_input.ip_header._destinationAddress[0].decode("UTF-8") == local_lan:
 				print("the lan is the local lan")
 				self.send_message_internally(udp_input)
 			else:
