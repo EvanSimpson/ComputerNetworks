@@ -2,7 +2,6 @@ from codes import *
 
 def morse_up(bin_input):
   print("in morse up")
-  print("input is " + bin_input)
   b = bin2bytearray(bin_input)
   print(b)
   return b
@@ -16,18 +15,18 @@ def bytearray2bin(bytearray_message):
   '''
   return message2bin(''.join([chr(b) for b in bytearray_message]))
 
-def bin2bytearray(bin):
+def bin2bytearray(bin_message):
   '''
   takes a binary string and turns it into the message as a bytearray
   '''
-  return bytearray([ord(c) for c in bin2message(bin)])
+  return bytearray([ord(c) for c in bin2message(bin_message)])
 
-def bin2message(bin):
+def bin2message(bin_message):
   '''
     bin is binary string which encodes the message
     returns the uncoded message
   '''
-  words = bin.split("0"*7) #this should really be 7, when the other code is fixed
+  words = bin_message.split("0"*7) #this should really be 7, when the other code is fixed
   if words[len(words)-1] == "":
       words.pop()
   bin_letters = [word.split('000') for word in words]
