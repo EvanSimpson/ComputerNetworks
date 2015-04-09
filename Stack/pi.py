@@ -26,6 +26,7 @@ def read_pin(pin):
 def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.01, debug=False):
 	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
+	print(data)
 	while(True):
 		busy = read_pin(carrier_pin)
 		if (busy == 0):
