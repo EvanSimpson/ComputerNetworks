@@ -41,7 +41,7 @@ def bin2morse(letters):
   '''
     letters is a list of binary letters
   '''
-  return morse2letters(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
+  return morse2letters(["".join([binMorse[l] for l in letter.split('0') if l!= ""]) for letter in letters if letter != ""])
 
 def morse2bin(code):
   '''

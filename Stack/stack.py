@@ -129,6 +129,7 @@ class Stack():
 		print("in handle input from gpio")
 		if self.is_router:
 			mac_obj = self.internal_stack.ascend(message_received.decode("UTF-8"))
+			print(mac_obj.payload)
 			self.route_message(mac_obj)
 		else:
 			udp_input = self.full_stack.ascend(message_received)
