@@ -107,12 +107,12 @@ class Stack():
 			else:
 				self.game_server_socket.close()
 			sys.exit()
-	
+
 	#handling inputs
 
 	def handle_input_from_switch(self, message_received, incoming_address):
 		dummy_mac = Mac("0", "0", "0", message_received.decode("UTF-8"))
-		
+
 		udp_input = self.external_stack.ascend(dummy_mac)
 		self.route_message(udp_input)
 
@@ -126,7 +126,7 @@ class Stack():
 
 	def add_new_client(self, port_letter, client_address):
 		self.active_game_ports[port_letter] = client_address
-	
+
 	def handle_input_from_gpio(self, message_received, incoming_address):
 		print("in handle input from gpio")
 		if self.is_router:
@@ -148,19 +148,19 @@ class Stack():
 			source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
 
 			to_send = json.dumps([{'payload': payload, 'address': source}])
-			
+
 			try:
 				game_server_socket.sendto(to_send, destination_address)
-			
+
 			except:
 				pass
 
 	def route_message(self, mac_obj):
 		# check the mac address, if it is for the router
-		# then take it up the stack and figure out 
+		# then take it up the stack and figure out
 		# if it is for out lan and if so, what the IP is
 		# then recreate the packet with the proper ip
-		# and send it to the 
+		# and send it to the
 		print("in route message")
 		print("mac destination is " + mac_obj.dest)
 		udp_obj = self.external_stack.ascend(mac_obj)
@@ -171,7 +171,7 @@ class Stack():
 			print("the lan is the local lan")
 			self.send_message_internally(udp_obj)
 
-	def send_message_internally(self, udp_input): 
+	def send_message_internally(self, udp_input):
 		#send the message over the gpio to the pi corresponding with dest_client
 		print("in send message internally")
 		destination_host_ip = udp_input[4] + udp_input[5]
@@ -198,7 +198,7 @@ class Stack():
 		#to_send should be a bytearray but I'm not suuure
 		try:
 			self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
-		except: 
+		except:
 			pass
 
 	# functions called on joesocket commands
@@ -246,6 +246,6 @@ class Stack():
 		# udp_header = UDPHeader()
 		# udp_header.setFields(source_address[0], destination_address[0], bytearray(message_to_send, encoding="UTF-8"))
 		return UDP(ip_header, srcAddr=source_address[0], destAddr=destination_address[0])
-	
+
 if __name__ == "__main__":
 	print("nothing yet")
