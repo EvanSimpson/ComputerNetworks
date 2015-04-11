@@ -186,10 +186,8 @@ class Stack():
 		print("source address: "+ source_mac_address)
 		print("dest address: " + destination_mac_address)
 		#does the socket want a bytearray or a string?
-		try:
-			gpio_server_socket.sendto(bytearray(udp_input[6], encoding="UTF-8"), (localhost, port))
-		except:
-			pass
+		print(udp_input[6])
+		self.send_message_over_gpio(( udp_input[1]+udp_input[2], udp_input[0]), ( udp_input[4]+udp_input[5], udp_input[3]), udp_input[6])
 
 	def send_message_externally(self, udp_input):
 		destination_lan_ip = LANs[udp_input.ip_header._destinationAddress[0]]
@@ -248,4 +246,6 @@ class Stack():
 		return UDP(ip_header, srcAddr=source_address[0], destAddr=destination_address[0])
 
 if __name__ == "__main__":
-	print("nothing yet")
+	message = bytearray("111010101110001110101110111000111010111010001011101110111011100011101011101000101011101110111000101110001110111011101110111000101110111011101110001010111011101110001011100010101011101110001010101011100010101011101110001010101011100010101010001010000000", encoding="UTF-8")
+	stack = Stack(is_router=True)
+	stack.handle_input_from_gpio(message, ("C1"))
