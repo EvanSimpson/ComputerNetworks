@@ -1,4 +1,4 @@
-from gpio_serve import GPIOServe
+#from gpio_serve import GPIOServe
 from stack import Stack
 import threading
 
@@ -8,7 +8,7 @@ def run_gpio_server():
 
 def run_stack_server(as_router):
 	stack_server = Stack(is_router=as_router)
-	Stack.receive_input()
+	stack_server.receive_input()
 
 def read_config_file():
 	config_file = open('config.txt', 'r')
@@ -22,10 +22,10 @@ def read_config_file():
 
 if __name__=="__main__":
 	params = read_config_file()
-	print(params)
 
-	gpio_thread = threading.Thread(target=run_gpio_server)
-	gpio_thread.start()
+	# gpio_thread = threading.Thread(target=run_gpio_server)
+	# gpio_thread.start()
 
-	stack_thread = threading.Thread(target=run_stack_server, args=(eval(params['is_router'])))
+	is_router = eval(params['is_router'])
+	stack_thread = threading.Thread(target=run_stack_server, args=(is_router,))
 	stack_thread.start()
