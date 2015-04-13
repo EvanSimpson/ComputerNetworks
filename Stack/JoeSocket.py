@@ -10,7 +10,7 @@ SOCK_DGRAM = socket.SOCK_DGRAM
 timeout = socket.timeout
 
 class JoeSocket(object):
-    
+
     def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
         self._family = family
         self._type = n_type
@@ -53,11 +53,11 @@ class JoeSocket(object):
                         print("Error: " + response["Error"])
                     else:
                         return 0
-                except e:
+                except:
                     # TODO check error to make sure socket is still open
-                    print(e)
-        except e:
-            print(e)
+                    continue
+        except:
+            pass
             # TODO error handling here
 
     def close(self):
@@ -99,7 +99,7 @@ class JoeSocket(object):
         self._closed = True
         self._pysock.close()
 
-    def recvfrom(self, buffsize, flags):
+    def recvfrom(self, buffsize):
         # Receive data from the socket. The return value is a pair
         # (bytes, address) where bytes is a bytes object representing the data
         # received and address is the address of the socket sending the data.
@@ -127,6 +127,7 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
+            print(self._stack_address)
             payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
             sent = self._pysock.sendto(payload, self._stack_address)
         else:

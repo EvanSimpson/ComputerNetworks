@@ -72,6 +72,7 @@ class Hangman(object):
                         self.sock.bind((self.ownIP, self.ownPort))
                         self.sock.settimeout(2.0)
 
+                        
                         # Wait for client to connect
                         while self.state == 'initialized':
                             try:
@@ -178,6 +179,6 @@ class Hangman(object):
 
 if __name__ == "__main__":
    IP = 'localhost'
-   port = 5280
+   port = '19'
    host = Hangman(IP, port)
    host.play()
