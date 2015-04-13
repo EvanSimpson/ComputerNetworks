@@ -58,14 +58,21 @@ class Stack():
 		self.gpio_address = (localhost, gpioport)
 		self.stack_address = (localhost, ownport)
 
+		# Sockets need .setblocking(False) to prevent .recvfrom()
+		# from blocking other socking from being read
+		# while waiting for data to come in on whichever socket
+		# is currently listening
 		if self.is_router:
 			self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			self.switch_socket.setblocking(False)
 			self.switch_socket.bind(self.stack_address)
 		else:
 			self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			self.game_server_socket.setblocking(False)
 			self.game_server_socket.bind(self.stack_address)
 
 		self.gpio_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.gpio_server_socket.setblocking(False)
 		self.gpio_server_socket.sendto(bytearray(0x01), self.gpio_address)
 
 	#listening for input over switch and gpio
@@ -82,36 +89,68 @@ class Stack():
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
 			self.handle_input_from_client(input_from_client, client_address)
-		except:
+		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.game_server_socket.close()
 			sys.exit()
+		except socket.timeout as e:
+			# Because of the non-blocking sockets, we need to catch
+			# this extra timeout error. We're not always receiving data,
+			# so a timeout isn't a bad thing, and like, we've got other
+			# sockets to read!
+			err = e.args[0]
+			if err == 'timed out':
+				pass
+			else:
+				print(e)
+				sys.exit(1)
+		except:
+			pass
 
-	def receive_over_switch():
+	def receive_over_switch(self):
 		try:
 			(incoming, socket_server_address) = self.switch_socket.recvfrom(1024)
 			self.handle_input_from_switch(incoming, socket_server_address)
-		except:
+		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.switch_socket.close()
 			sys.exit()
+		except socket.timeout as e:
+			err = e.args[0]
+			if err == 'timed out':
+				pass
+			else:
+				print(e)
+				sys.exit(1)
+		except:
+			pass
 
 	def receive_over_gpio(self):
 		try:
 			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
-			print(incoming)
 			self.handle_input_from_gpio(incoming, gpio_address)
-		except:
+		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			if self.is_router:
 				self.switch_socket.close()
 			else:
 				self.game_server_socket.close()
-			sys.exit()
+			sys.exit(1)
+		except socket.timeout as e:
+			err = e.args[0]
+			if err == 'timed out':
+				pass
+			else:
+				print(e)
+				sys.exit(1)
+		except:
+			pass
 
 	#handling inputs
 
 	def handle_input_from_switch(self, message_received, incoming_address):
+		print("got message over switch")
+		print(message_received.decode("UTF-8"))
 		dummy_mac = Mac("0", "0", "0", message_received.decode("UTF-8"))
 
 		udp_input = self.external_stack.ascend(dummy_mac)
@@ -233,4 +272,5 @@ class Stack():
 if __name__ == "__main__":
 	message = bytearray("111010101110001110101110111000111010111010001011101110111011100011101011101000101011101110111000101110001110111011101110111000101110111011101110001010111011101110001011100010101011101110001010101011100010101011101110001010101011100010101010001010000000", encoding="UTF-8")
 	stack = Stack(is_router=True)
-	stack.handle_input_from_gpio(message, ("C1"))
+	stack.receive_input()
+	# stack.handle_input_from_gpio(message, ("C1"))
