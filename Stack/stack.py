@@ -115,7 +115,7 @@ class Stack():
 		dummy_mac = Mac("0", "0", "0", message_received.decode("UTF-8"))
 
 		udp_input = self.external_stack.ascend(dummy_mac)
-		self.route_message(udp_input)
+		self.send_message_internally(udp_input)
 
 	def handle_input_from_client(self, message_bytearray, client_address):
 
@@ -165,9 +165,6 @@ class Stack():
 		if mac_obj.dest == "0":
 			print("mac destination is router")
 			self.send_message_externally(udp_obj)
-		else:
-			print("the lan is the local lan")
-			self.send_message_internally(udp_obj)
 
 	def send_message_internally(self, udp_input):
 		#send the message over the gpio to the pi corresponding with dest_client
