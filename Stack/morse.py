@@ -1,34 +1,35 @@
 from codes import *
 
-def morse_up(input):
-  return bin2bytearray(input)
+def morse_up(bin_input):
+  return bin2bytearray(bin_input)
 
-def morse_down(input):
-  return bytearray2bin(input)
+def morse_down(bytearray_input):
+  return bytearray2bin(bytearray_input)
 
-def bytearray2bin(bytearray_message):
+def bytearray2bin(string_message):
   '''
-    takes a message as a bytearray and turns it into binary
+    takes a message as a string and turns it into binary
   '''
-  return message2bin(''.join([chr(b) for b in bytearray_message]))
+  return message2bin(string_message)
 
-def bin2bytearray(bin):
+def bin2bytearray(bin_message):
   '''
   takes a binary string and turns it into the message as a bytearray
   '''
-  return bytearray([ord(c) for c in bin2message(bin)])
+  return bin2message(bin_message)
 
-def bin2message(bin):
+def bin2message(bin_message):
   '''
     bin is binary string which encodes the message
     returns the uncoded message
   '''
-  words = bin.split("0"*7) #this should really be 7, when the other code is fixed
+  words = bin_message.split("0"*7) #this should really be 7, when the other code is fixed
   if words[len(words)-1] == "":
       words.pop()
   bin_letters = [word.split('000') for word in words]
-
-  return ' '.join(map(bin2morse, bin_letters))
+  ret = ' '.join(map(bin2morse, bin_letters))
+  print(ret)
+  return ret
 
 def message2bin(message):
   '''
@@ -41,7 +42,7 @@ def bin2morse(letters):
   '''
     letters is a list of binary letters
   '''
-  return morse2letters(["".join([binMorse[l] for l in letter.split('0')]) for letter in letters])
+  return morse2letters(["".join([binMorse[l] for l in letter.split('0') if l!= ""]) for letter in letters if letter != ""])
 
 def morse2bin(code):
   '''
@@ -77,3 +78,7 @@ def word2letters(word):
     letters.remove(letter)
 
   return '00'.join(map(letter2morse, letters))+'00'
+
+if __name__ == "__main__":
+  binary = morse_down(bytearray("pipstain", encoding="UTF-8"))
+  out = morse_up(binary)

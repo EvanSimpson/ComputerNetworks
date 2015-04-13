@@ -49,7 +49,7 @@ def encode_message(message):
 	creates a mac string out of a existing mac object that contains all of the parts needed for the message
 	'''
 	if type(message) is bytearray:
-		mac_obj = Mac("A", "B", '1', message)
+		mac_obj = Mac("0", "0", '0', message)
 	else:
 		mac_obj = message
 	return mac_obj.create_message()
@@ -60,6 +60,8 @@ def decode_message(mac_bytearray):
 	verifies that the payload has been properly transmitted,
 	and outputs the verified mac object
 	'''
+	print("in datalink up")
+	print(mac_bytearray)
 	destination = mac_bytearray[0:1]
 	source = mac_bytearray[1:2]
 	next_protocol = mac_bytearray[2:3]
