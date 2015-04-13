@@ -30,6 +30,7 @@ LANs = {
 class Stack():
 
 	def __init__(self, is_router=False):
+		self.mac_address = "Y"
 		self.is_router = is_router
 		self.active_game_ports = {}
 		self.joesocket_commands = {
@@ -128,24 +129,21 @@ class Stack():
 		self.active_game_ports[port_letter] = client_address
 
 	def handle_input_from_gpio(self, message_received, incoming_address):
-		print("in handle input from gpio")
+		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
 		if self.is_router:
-			mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
-			print(mac_payload)
-			print("just printed mac_obj")
 			self.route_message(mac_payload)
-		else:
+		elif mac_payload.dest == self.mac_address:
 			udp_input = self.full_stack.ascend(message_received)
-			print(udp_input.packet)
-			#self.send_message_to_application(udp_input)
+			self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
-		destination_port = udp_input.udp_header._destinationPort
+		# udp_input = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
+		destination_port = udp_input[3]
 		if destination_port in self.active_game_ports:
 			destination_address = self.active_game_ports[destination_port]
 
-			payload = udp_input.udp_header._payload
-			source = (udp_input.ip_header._sourceAddress, udp_input.udp_header._sourcePort)
+			payload = udp_input[6]
+			source = (udp_input[1]+udp_input[2], udp_input[0])
 
 			to_send = json.dumps([{'payload': payload, 'address': source}])
 
