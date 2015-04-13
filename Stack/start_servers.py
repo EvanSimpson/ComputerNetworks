@@ -27,5 +27,5 @@ if __name__=="__main__":
 	gpio_thread = threading.Thread(target=run_gpio_server)
 	gpio_thread.start()
 
-	stack_thread = threading.Thread(target=run_stack_server, args=(bool(params['is_router'])))
+	stack_thread = threading.Thread(target=run_stack_server, args=(eval(params['is_router'])))
 	stack_thread.start()
