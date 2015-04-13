@@ -5,8 +5,12 @@ import generate_port
 localhost = '127.0.0.1'
 stack_port = 5000
 olinhost = 'A'
+AF_INET = socket.AF_INET
+SOCK_DGRAM = socket.SOCK_DGRAM
+timeout = socket.timeout
 
 class JoeSocket(object):
+    
     def __init__(self, family=socket.AF_INET, n_type=socket.SOCK_STREAM, proto=0):
         self._family = family
         self._type = n_type
@@ -27,6 +31,9 @@ class JoeSocket(object):
     def _initialize_socket(self):
         self._pysock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._address = (olinhost, "01")
+
+    def settimeout(self, timeout_time):
+        self.timeout = timeout_time
 
     def bind(self, address):
         # Bind the socket to address. The socket must not already be bound.
