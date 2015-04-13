@@ -8,8 +8,8 @@ from datalink import Mac, encode_message, decode_message
 from morse import morse_down, morse_up
 
 localhost = '127.0.0.1'
-routerport = 2048 #do we need this?
-ownport = 5000 #do we need this?
+routerport = 2048
+ownport = 5000
 authorityport = 5002
 gpioport = 5003
 local_lan = "C"
@@ -18,14 +18,14 @@ local_mac_addresses = {
 	"C1" : "X",
 	"C2" : "Y",
 	"C3" : "Z"
-	}
+}
 
 LANs = {
 	"A" : "127.0.0.1",
 	"B" : "127.0.0.1",
 	"C" : "127.0.0.1",
 	"D" : "127.0.0.1"
-	}
+}
 
 class Stack():
 
@@ -57,6 +57,7 @@ class Stack():
 	def setup_servers(self):
 		self.gpio_address = (localhost, gpioport)
 		self.stack_address = (localhost, ownport)
+		self.switch_address = (localhost, routerport)
 
 		# Sockets need .setblocking(False) to prevent .recvfrom()
 		# from blocking other socking from being read
@@ -65,7 +66,7 @@ class Stack():
 		if self.is_router:
 			self.switch_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			self.switch_socket.setblocking(False)
-			self.switch_socket.bind(self.stack_address)
+			self.switch_socket.bind(self.switch_address)
 		else:
 			self.game_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			self.game_server_socket.setblocking(False)
