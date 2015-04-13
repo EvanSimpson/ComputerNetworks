@@ -30,7 +30,7 @@ LANs = {
 class Stack():
 
 	def __init__(self, is_router=False):
-		self.mac_address = "Y"
+		self.mac_address = "Y" # Temporary - this should be loaded from a config file
 		self.is_router = is_router
 		self.active_game_ports = {}
 		self.joesocket_commands = {
@@ -133,7 +133,7 @@ class Stack():
 		if self.is_router:
 			self.route_message(mac_payload)
 		elif mac_payload.dest == self.mac_address:
-			udp_input = self.full_stack.ascend(message_received)
+			udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
 			self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
