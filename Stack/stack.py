@@ -226,22 +226,12 @@ class Stack():
 		# address = (LAN+host, port)
 		# param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
 		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], destination_address[1], destination_address[0][0], destination_address[0][1], message_to_send)
-		# udp_obj = self.initialize_udp(source_address, destination_address, message_to_send)
 		to_transmit_string = self.full_stack.descend(stack_entry)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		try:
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
 		except:
 			pass
-
-	def initialize_udp(self, source_address, destination_address, message_to_send):
-
-		ip_header = IPHeader()
-		print(type(message_to_send))
-		ip_header.setFields(source_address[1], destination_address[1], "1", bytearray(message_to_send, encoding="UTF-8"))
-		# udp_header = UDPHeader()
-		# udp_header.setFields(source_address[0], destination_address[0], bytearray(message_to_send, encoding="UTF-8"))
-		return UDP(ip_header, srcAddr=source_address[0], destAddr=destination_address[0])
 
 if __name__ == "__main__":
 	message = bytearray("111010101110001110101110111000111010111010001011101110111011100011101011101000101011101110111000101110001110111011101110111000101110111011101110001010111011101110001011100010101011101110001010101011100010101011101110001010101011100010101010001010000000", encoding="UTF-8")
