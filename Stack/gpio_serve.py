@@ -50,6 +50,7 @@ class GPIOServe(object):
                     # over to the stack if so
                     if send_buffer_lock.acquire():
                         if len(send_buffer) > 0 and self.stack_address:
+                            print("got a message to send to stack" + str(send_buffer))
                             s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
                             del send_buffer[0]
                         send_buffer_lock.release()
