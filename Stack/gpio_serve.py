@@ -71,6 +71,7 @@ class GPIOServe(object):
                     self.stack_address = stack_address
                     data = from_stack.decode("UTF-8")
                     if len(data) > 1:
+                        print("about to transmit over the pi")
                         pi.transmit(data)
 
                 except socket.error:
