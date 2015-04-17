@@ -172,7 +172,9 @@ class Stack():
 
 	def handle_input_from_gpio(self, message_received, incoming_address):
 		print("in handle input from gpio")
+		print("message received: " + str(message_received))
 		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
+		print("mac payload: " + str(mac_payload))
 		if self.is_router:
 			self.route_message(mac_payload)
 		elif mac_payload.dest == self.mac_address:
