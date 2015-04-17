@@ -45,7 +45,6 @@ class GPIOServe(object):
 
             while True:
                 try:
-                    print("LISTENING FOR GODS SAKE SOMEONE SAY SOMETHING")
                     # Check if something has come in from the GPIO and send it
                     # over to the stack if so
                     if send_buffer_lock.acquire():
