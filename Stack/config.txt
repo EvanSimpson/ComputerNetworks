@@ -1,3 +1,0 @@
-is_router:False
-id:1
-LAN:A
