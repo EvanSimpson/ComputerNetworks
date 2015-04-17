@@ -274,6 +274,7 @@ class Stack():
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		print("to transmit: " + to_transmit_string)
 		try:
+			print("about to send the message")
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
 		except:
 			pass
