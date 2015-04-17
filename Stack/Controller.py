@@ -3,6 +3,7 @@ import JoeSocket
 import Model
 import View
 from read_config import get_config_params
+import generate_port
 
 class Hangman(object):
 
@@ -179,8 +180,8 @@ class Hangman(object):
                 break
 
 if __name__ == "__main__":
-   params = get_config_params()
-   IP = params['LAN'] + params['id']
-   port = '19'
-   host = Hangman(IP, port)
-   host.play()
+    params = get_config_params()
+    IP = params['LAN'] + params['id']
+    port = '19'
+    host = Hangman(IP, port)
+    host.play()

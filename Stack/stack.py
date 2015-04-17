@@ -130,6 +130,7 @@ class Stack():
 	def receive_over_gpio(self):
 		try:
 			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
+			print("incoming: " + str(incoming))
 			self.handle_input_from_gpio(incoming, gpio_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
@@ -170,6 +171,7 @@ class Stack():
 		self.active_game_ports[port_letter] = client_address
 
 	def handle_input_from_gpio(self, message_received, incoming_address):
+		print("in handle input from gpio")
 		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
 		if self.is_router:
 			self.route_message(mac_payload)
@@ -267,6 +269,7 @@ class Stack():
 		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], str(destination_address[1]), destination_address[0][0], destination_address[0][1], message_to_send)
 		to_transmit_string = self.full_stack.descend(stack_entry)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
+		print("to transmit: " + to_transmit_string)
 		try:
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
 		except:
