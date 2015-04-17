@@ -47,6 +47,7 @@ class Hangman(object):
     def sendReady(self):
         msg = 'READY'
         byteMsg = bytearray(msg, encoding="UTF-8")
+        print("about to send ready message")
         return self.sock.sendto(byteMsg, self.hostAddress)
 
 

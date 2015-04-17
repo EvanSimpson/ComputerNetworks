@@ -145,7 +145,8 @@ class JoeSocket(object):
         # remote socket, since the destination socket is specified by address.
         # The optional flags argument has the same meaning as for recv() above.
         # Return the number of bytes sent. (The format of address depends on the
-        # address family — see above.)
+        # address family — see above.)  
+        print("in joesocket sendto")
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
