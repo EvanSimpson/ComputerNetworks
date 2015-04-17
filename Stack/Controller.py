@@ -81,8 +81,9 @@ class Hangman(object):
                             try:
                                 input_from_client, clientAddress = sock.recvfrom(1024)
                                 client_message = input_from_client.decode("UTF-8")
-
+                                print("client message is " + client_message)
                                 if client_message == "READY":
+                                    print("got the ready message")
                                     self.state = 'ready'
                                     self.clientAddress = clientAddress
 
