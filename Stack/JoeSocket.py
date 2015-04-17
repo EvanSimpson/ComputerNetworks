@@ -1,9 +1,11 @@
 import json
 import socket
 import generate_port
+from read_config import get_config_params
 
 localhost = '127.0.0.1'
 stack_port = 5000
+generate_port_address = (localhost, generate_port.hostport)
 olinhost = 'A'
 AF_INET = socket.AF_INET
 SOCK_DGRAM = socket.SOCK_DGRAM
@@ -30,7 +32,27 @@ class JoeSocket(object):
 
     def _initialize_socket(self):
         self._pysock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._address = (olinhost, "01")
+        config_params = get_config_params()
+        pi_id = config_params['id']
+        ip = olinhost + pi_id
+        port_num = self.generate_port_num()
+        print("our port num is: " + port_num)
+        self._address = (ip, port_num)
+
+    def generate_port_num(self):
+        try:
+            self._pysock.sendto(bytearray("0", encoding="UTF-8"), generate_port_address)
+        except:
+            return "failed on send"
+
+        try:
+            while True:
+                newport, address = self._pysock.recvfrom(1024)
+                if address == generate_port_address:
+                    return newport.decode("UTF-8")
+        except:
+            return "failed on receive"
+
 
     def settimeout(self, timeout_time):
         self.timeout = timeout_time
@@ -90,8 +112,8 @@ class JoeSocket(object):
                         # TODO error handling here
                     else:
                         return 0
-                except e:
-                    print(e)
+                except:
+                    continue
         except e:
             # TODO check error to make sure socket is still open
             print(e)
@@ -127,7 +149,7 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
-            print(self._stack_address)
+            print(self._address)
             payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
             sent = self._pysock.sendto(payload, self._stack_address)
         else:
@@ -136,5 +158,5 @@ class JoeSocket(object):
 
 if __name__ == "__main__":
     sock = JoeSocket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("CC", "19"))
-    sock.close()
+    sock.bind(("C1", "19"))
+    # sock.close()

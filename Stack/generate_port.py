@@ -38,7 +38,7 @@ class PortAuthority(object):
                         self.free_port_num(client_address)
                     else:
                         port = self.generate_port_num(client_address)
-                        s.sendto(bytearray(port), client_address)
+                        s.sendto(bytearray(str(port), encoding="UTF-8"), client_address)
                 except KeyboardInterrupt:
                     s.close()
                     sys.exit()

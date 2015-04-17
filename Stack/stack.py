@@ -89,6 +89,7 @@ class Stack():
 	def receive_from_games(self):
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
+			print("input from client: " + str(input_from_client))
 			self.handle_input_from_client(input_from_client, client_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
@@ -158,7 +159,7 @@ class Stack():
 		self.send_message_internally(udp_input)
 
 	def handle_input_from_client(self, message_bytearray, client_address):
-
+		print(str(message_bytearray))
 		parsed_message = json.loads(message_bytearray.decode("UTF-8"))
 		if parsed_message['params']['source_address'][1] not in self.active_game_ports:
 			self.add_new_client(parsed_message['params']['source_address'][1], client_address)
@@ -247,6 +248,7 @@ class Stack():
 		self.send_acknowledgement(socket_port)
 
 	def joesocket_sendto(self, source_address, destination_address, data):
+		print("in send to: " + str(data))
 		self.send_message_over_gpio(source_address, destination_address, data)
 		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
@@ -262,7 +264,7 @@ class Stack():
 	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
 		# address = (LAN+host, port)
 		# param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
-		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], destination_address[1], destination_address[0][0], destination_address[0][1], message_to_send)
+		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], str(destination_address[1]), destination_address[0][0], destination_address[0][1], message_to_send)
 		to_transmit_string = self.full_stack.descend(stack_entry)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
 		try:

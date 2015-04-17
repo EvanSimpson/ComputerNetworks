@@ -28,7 +28,6 @@ def bin2message(bin_message):
       words.pop()
   bin_letters = [word.split('000') for word in words]
   ret = ' '.join(map(bin2morse, bin_letters))
-  print(ret)
   return ret
 
 def message2bin(message):

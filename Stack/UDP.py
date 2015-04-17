@@ -10,9 +10,8 @@ def byteArrayToInt(data):
 
 def encode_udp(param_tuple):
     # param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
-    udp_obj = UDP(param_tuple[0], param_tuple[3], param_tuple[6])
+    udp_obj = UDP(param_tuple[0], destPort=param_tuple[3], payload=param_tuple[6])
     udp_packet = udp_obj.packet
-
     return (param_tuple[1], param_tuple[2], param_tuple[4], param_tuple[5], "A", udp_packet)
 
 def decode_udp(param_tuple):
@@ -42,6 +41,12 @@ class UDP(object):
             self.packet = self.srcPort + self.destPort + self.payload
         else:
             self.parse(srcPort)
+
+        if len(self.srcPort) == 1:
+            self.srcPort = "0" + self.srcPort
+        
+        if len(destPort) == 1:
+            self.destPort = "0" + self.destPort
 
         if len(self.srcPort) != 2 or len(self.destPort) != 2:
             raise ValueError

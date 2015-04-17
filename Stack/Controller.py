@@ -2,6 +2,7 @@ import sys
 import JoeSocket
 import Model
 import View
+from read_config import get_config_params
 
 class Hangman(object):
 
@@ -71,7 +72,7 @@ class Hangman(object):
                     while True:
                         self.sock.bind((self.ownIP, self.ownPort))
                         self.sock.settimeout(2.0)
-
+                        print("Starting a game at " + "(" + str(self.ownIP) + "," + str(self.ownPort) + ")")
                         
                         # Wait for client to connect
                         while self.state == 'initialized':
@@ -178,7 +179,8 @@ class Hangman(object):
                 break
 
 if __name__ == "__main__":
-   IP = 'localhost'
+   params = get_config_params()
+   IP = params['LAN'] + params['id']
    port = '19'
    host = Hangman(IP, port)
    host.play()
