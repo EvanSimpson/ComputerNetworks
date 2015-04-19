@@ -176,24 +176,31 @@ class Stack():
 		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
 		print("mac payload: " + str(mac_payload))
 		print("mac_payload dest is " + str(mac_payload.dest))
+		print("mac address is " + str(mac_address))
 		if self.is_router:
 			self.route_message(mac_payload)
 		elif mac_payload.dest == self.mac_address:
+			print("about to ascend stack")
 			udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
+			print("udp input is : " + str(udp_input))
 			self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
 		# udp_input = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
+		print("in send message to application")
 		destination_port = udp_input[3]
+		print("destination port is " + str(destination_port))
+		print("active game ports: " + str(active_game_ports))
 		if destination_port in self.active_game_ports:
 			destination_address = self.active_game_ports[destination_port]
-
+			print("destination address is: " + str(destination_address))
 			payload = udp_input[6]
 			source = (udp_input[1]+udp_input[2], udp_input[0])
 
 			to_send = json.dumps([{'payload': payload, 'address': source}])
-
+			print("to send is " + str(to_send))
 			try:
+				print("about to send to game_server_socket: " + str(destination_address))
 				game_server_socket.sendto(to_send, destination_address)
 
 			except:
