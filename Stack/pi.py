@@ -55,6 +55,7 @@ def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.04, debug
 	times = []
 	def data_callback(channel):
 		times.append(time.time())
+		print("Data edge")
 	def carrier_callback(channel):
 		times.append(time.time())
 		if not read_pin(carrier_pin):
