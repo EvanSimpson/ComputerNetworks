@@ -9,8 +9,8 @@ def run_gpio_server():
 	gpio_server = GPIOServe()
 	gpio_server.listen()
 
-def run_stack_server(as_router):
-	stack_server = Stack(is_router=as_router)
+def run_stack_server(mac_address, as_router):
+	stack_server = Stack(mac_address=mac_address, is_router=as_router)
 	stack_server.receive_input()
 
 def run_port_server():
