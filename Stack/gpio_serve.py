@@ -69,7 +69,9 @@ class GPIOServe(object):
                     # over to the GPIO if so
                     (from_stack, stack_address) = s.recvfrom(1024)
                     self.stack_address = stack_address
+                    print("Received data from stack")
                     data = from_stack.decode("UTF-8")
+                    print(data)
                     if len(data) > 1:
                         print("about to transmit over the pi")
                         pi.transmit(data)
