@@ -15,6 +15,7 @@ gpioport = 5003
 local_lan = "C"
 router_mac = "0"
 local_mac_addresses = {
+	"C0" : "0",
 	"C1" : "X",
 	"C2" : "Y",
 	"C3" : "Z"
@@ -29,8 +30,8 @@ LANs = {
 
 class Stack():
 
-	def __init__(self, is_router=False):
-		self.mac_address = "Y" # Temporary - this should be loaded from a config file
+	def __init__(self, mac_address, is_router=False):
+		self.mac_address = mac_address # Temporary - this should be loaded from a config file
 		self.is_router = is_router
 		self.active_game_ports = {}
 		self.joesocket_commands = {
@@ -230,7 +231,7 @@ class Stack():
 			source_host_ip = udp_input[2]
 			source_mac_address = local_mac_addresses[local_lan+source_host_ip]
 		else:
-			source_mac_address = router_mac
+			source_mac_address = self.mac_address # the router's MAC address
 		print("source address: "+ source_mac_address)
 		print("dest address: " + destination_mac_address)
 		#does the socket want a bytearray or a string?

@@ -28,6 +28,7 @@ if __name__=="__main__":
 
 	sleep(1)
 	is_router = eval(params['is_router'])
+	mac_address = params['MAC']
 	print("is router : " + str(is_router))
-	stack_thread = threading.Thread(target=run_stack_server, args=(is_router,))
+	stack_thread = threading.Thread(target=run_stack_server, args=(mac_address, is_router,))
 	stack_thread.start()
