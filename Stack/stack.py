@@ -176,7 +176,7 @@ class Stack():
 		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
 		print("mac payload: " + str(mac_payload))
 		print("mac_payload dest is " + str(mac_payload.dest))
-		print("mac address is " + str(mac_address))
+		print("mac address is " + str(self.mac_address))
 		if self.is_router:
 			self.route_message(mac_payload)
 		elif mac_payload.dest == self.mac_address:
