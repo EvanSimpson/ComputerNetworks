@@ -1,3 +1,4 @@
+from time import sleep
 from gpio_serve import GPIOServe
 from stack import Stack
 from generate_port import PortAuthority
@@ -22,10 +23,11 @@ if __name__=="__main__":
 	gpio_thread = threading.Thread(target=run_gpio_server)
 	gpio_thread.start()
 
+	generateport_thread = threading.Thread(target=run_port_server)
+	generateport_thread.start()
+
+	sleep(1)
 	is_router = eval(params['is_router'])
 	print("is router : " + str(is_router))
 	stack_thread = threading.Thread(target=run_stack_server, args=(is_router,))
 	stack_thread.start()
-
-	generateport_thread = threading.Thread(target=run_port_server)
-	generateport_thread.start()
