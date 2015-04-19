@@ -131,7 +131,7 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         try:
-            print("trying to recvrom")
+            #print("trying to recvrom")
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
