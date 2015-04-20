@@ -6,9 +6,8 @@ from read_config import get_config_params
 localhost = '127.0.0.1'
 stack_port = 5000
 generate_port_address = (localhost, generate_port.hostport)
-olinhost = 'A'
-AF_INET = socket.AF_INET
-SOCK_DGRAM = socket.SOCK_DGRAM
+params = get_config_params()
+olinhost = params["LAN"]
 timeout = socket.timeout
 
 class JoeSocket(object):
