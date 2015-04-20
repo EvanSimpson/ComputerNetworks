@@ -105,6 +105,8 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
+		except socket.error as e:
+			pass
 		else:
 			print("input from client: " + str(input_from_client))
 			self.handle_input_from_client(input_from_client, client_address)
@@ -123,6 +125,8 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
+		except socket.error as e:
+			pass
 		else:
 			self.handle_input_from_switch(incoming, socket_server_address)
 
