@@ -266,7 +266,6 @@ class Stack():
 	def joesocket_sendto(self, source_address, destination_address, data):
 		print("in send to: " + str(data))
 		self.send_message_over_gpio(source_address, destination_address, data)
-		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")

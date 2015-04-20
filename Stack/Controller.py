@@ -146,12 +146,13 @@ class Hangman(object):
                     # Wait for input word to come from host
                     while self.state == 'ready':
                         try:
-                            inputWord, hostAddress = sock.recvfrom(1024)
+                            inputWord, hostAddress = self.sock.recvfrom(1024)
+                        except:
+                            continue
+                        else:
                             self.view = View.View('_'*len(inputWord), [], 0)
                             self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
-                        except:
-                            continue
 
                     # Begin game
                     while self.state == 'play':
