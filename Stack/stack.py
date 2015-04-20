@@ -202,7 +202,7 @@ class Stack():
 			payload = udp_input[6]
 			source = (udp_input[1]+udp_input[2], udp_input[0])
 
-			to_send = json.dumps([{'payload': payload, 'address': source}])
+			to_send = json.dumps({'payload': payload, 'address': source})
 			print("to send is " + str(to_send))
 			try:
 				print("about to send to game_server_socket: " + str(destination_address))
