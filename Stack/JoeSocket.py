@@ -69,15 +69,16 @@ class JoeSocket(object):
             while 1:
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
+                except:
+                    # TODO check error to make sure socket is still open
+                    continue
+                else:
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response["Error"] != 0:
                         # TODO error handling here
                         print("Error: " + response["Error"])
                     else:
                         return 0
-                except:
-                    # TODO check error to make sure socket is still open
-                    continue
         except:
             pass
             # TODO error handling here
@@ -106,14 +107,15 @@ class JoeSocket(object):
             while 1:
                 try:
                     from_stack, stack_address = self._pysock.recvfrom(1024)
+                except:
+                    continue
+                else:
                     response = json.loads(from_stack.decode("UTF-8"))
                     if response["Error"] != 0:
                         print(response["Error"])
                         # TODO error handling here
                     else:
                         return 0
-                except:
-                    continue
         except e:
             # TODO check error to make sure socket is still open
             print(e)
@@ -135,20 +137,21 @@ class JoeSocket(object):
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
+        except:
+            #TODO throw the same error that the pysocket would have thrown
+            pass
+        else:
             print("from stack is: " + str(from_stack))
             response = json.loads(from_stack.decode("UTF-8"))
             print("response payload in joesocket is: " + str(response.payload))
             return (response.payload, response.address)
-        except:
-            #TODO throw the same error that the pysocket would have thrown
-            pass
 
     def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
         # remote socket, since the destination socket is specified by address.
         # The optional flags argument has the same meaning as for recv() above.
         # Return the number of bytes sent. (The format of address depends on the
-        # address family — see above.)  
+        # address family — see above.)
         print("in joesocket sendto")
         if not self._pysock:
             self._initialize_socket()
