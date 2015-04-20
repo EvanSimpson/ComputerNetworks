@@ -38,7 +38,6 @@ class UDP(object):
             self.srcPort = srcPort
             self.destPort = destPort
             self.payload = payload
-            self.packet = self.srcPort + self.destPort + self.payload
         else:
             self.parse(srcPort)
 
@@ -51,8 +50,9 @@ class UDP(object):
         if len(self.srcPort) != 2 or len(self.destPort) != 2:
             raise ValueError
 
+        self.packet = self.srcPort + self.destPort + self.payload
+
     def parse(self, packet):
-        self.packet = packet
         self.srcPort = packet[0:2]
         self.destPort = packet[2:4]
         self.payload = packet[4:]
