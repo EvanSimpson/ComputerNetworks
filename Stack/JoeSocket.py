@@ -8,6 +8,8 @@ stack_port = 5000
 generate_port_address = (localhost, generate_port.hostport)
 params = get_config_params()
 olinhost = params["LAN"]
+AF_INET = socket.AF_INET
+SOCK_DGRAM = socket.SOCK_DGRAM
 timeout = socket.timeout
 
 class JoeSocket(object):
