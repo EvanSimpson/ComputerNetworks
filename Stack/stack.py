@@ -205,7 +205,7 @@ class Stack():
 			print("to send is " + str(to_send))
 			try:
 				print("about to send to game_server_socket: " + str(destination_address))
-				self.game_server_socket.sendto(to_send, destination_address)
+				self.game_server_socket.sendto(bytearray(to_send, encoding="UTF-8"), destination_address)
 			except socket.error as e:
 				pass
 
