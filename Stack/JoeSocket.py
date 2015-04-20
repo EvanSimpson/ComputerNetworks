@@ -137,14 +137,14 @@ class JoeSocket(object):
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recvfrom(1024)
-        except:
+        except socket.error:
             #TODO throw the same error that the pysocket would have thrown
             pass
         else:
             print("from stack is: " + str(from_stack))
             response = json.loads(from_stack.decode("UTF-8"))
-            print("response payload in joesocket is: " + str(response.payload))
-            return (response.payload, response.address)
+            print("response payload in joesocket is: " + str(response["payload"]))
+            return (response["payload"], response["address"])
 
     def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
