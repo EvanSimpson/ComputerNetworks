@@ -143,6 +143,8 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
+		except socket.error as e:
+			pass
 		else:
 			print("incoming: " + str(incoming))
 			self.handle_input_from_gpio(incoming, gpio_address)
@@ -200,7 +202,7 @@ class Stack():
 			try:
 				print("about to send to game_server_socket: " + str(destination_address))
 				self.game_server_socket.sendto(to_send, destination_address)
-			except:
+			except socket.error as e:
 				pass
 
 	def route_message(self, mac_obj):
@@ -241,7 +243,7 @@ class Stack():
 		#to_send should be a bytearray but I'm not suuure
 		try:
 			self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
-		except:
+		except socket.error as e:
 			pass
 
 	# functions called on joesocket commands
@@ -265,7 +267,7 @@ class Stack():
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
 		try:
 			self.game_server_socket.sendto(return_message, client_address)
-		except:
+		except socket.error as e:
 			pass
 
 	#sending data over gpio based on input from joesocket
@@ -280,7 +282,7 @@ class Stack():
 		try:
 			print("about to send the message")
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
-		except:
+		except socket.error as e:
 			pass
 
 if __name__ == "__main__":
