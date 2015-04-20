@@ -90,8 +90,6 @@ class Stack():
 	def receive_from_games(self):
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
-			print("input from client: " + str(input_from_client))
-			self.handle_input_from_client(input_from_client, client_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.game_server_socket.close()
@@ -107,13 +105,13 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
-			pass
+		else:
+			print("input from client: " + str(input_from_client))
+			self.handle_input_from_client(input_from_client, client_address)
 
 	def receive_over_switch(self):
 		try:
 			(incoming, socket_server_address) = self.switch_socket.recvfrom(1024)
-			self.handle_input_from_switch(incoming, socket_server_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.switch_socket.close()
@@ -125,14 +123,12 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
-			pass
+		else:
+			self.handle_input_from_switch(incoming, socket_server_address)
 
 	def receive_over_gpio(self):
 		try:
 			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
-			print("incoming: " + str(incoming))
-			self.handle_input_from_gpio(incoming, gpio_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			if self.is_router:
@@ -147,8 +143,9 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
-			pass
+		else:
+			print("incoming: " + str(incoming))
+			self.handle_input_from_gpio(incoming, gpio_address)
 
 	#handling inputs
 
@@ -202,8 +199,7 @@ class Stack():
 			print("to send is " + str(to_send))
 			try:
 				print("about to send to game_server_socket: " + str(destination_address))
-				game_server_socket.sendto(to_send, destination_address)
-
+				self.game_server_socket.sendto(to_send, destination_address)
 			except:
 				pass
 
