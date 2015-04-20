@@ -29,7 +29,7 @@ def encode_ip(param_tuple):
 
 def decode_ip(mac_obj):
     ip = IP(mac_obj.payload)
-    
+
     return (ip.srcLan, ip.srcHost, ip.destLan, ip.destHost, ip.payload)
 
 class UDP(object):
@@ -44,7 +44,7 @@ class UDP(object):
 
         if len(self.srcPort) == 1:
             self.srcPort = "0" + self.srcPort
-        
+
         if len(destPort) == 1:
             self.destPort = "0" + self.destPort
 
@@ -87,4 +87,3 @@ if __name__ == "__main__":
     print(packet)
     info = decode_udp(decode_ip(packet))
     print(info)
-
