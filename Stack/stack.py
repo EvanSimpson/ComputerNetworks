@@ -177,17 +177,18 @@ class Stack():
 	def handle_input_from_gpio(self, message_received, incoming_address):
 		print("in handle input from gpio")
 		print("message received: " + str(message_received))
-		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
-		print("mac payload: " + str(mac_payload))
-		print("mac_payload dest is " + str(mac_payload.dest))
-		print("mac address is " + str(self.mac_address))
-		if self.is_router:
-			self.route_message(mac_payload)
-		elif mac_payload.dest == self.mac_address:
-			print("about to ascend stack")
-			udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
-			print("udp input is : " + str(udp_input))
-			self.send_message_to_application(udp_input)
+		if len(message_received) > 0:
+			mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
+			print("mac payload: " + str(mac_payload))
+			print("mac_payload dest is " + str(mac_payload.dest))
+			print("mac address is " + str(self.mac_address))
+			if self.is_router:
+				self.route_message(mac_payload)
+			elif mac_payload.dest == self.mac_address:
+				print("about to ascend stack")
+				udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
+				print("udp input is : " + str(udp_input))
+				self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
 		# udp_input = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)

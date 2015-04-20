@@ -75,11 +75,11 @@ class Hangman(object):
                         self.sock.bind((self.ownIP, self.ownPort))
                         self.sock.settimeout(2.0)
                         print("Starting a game at " + "(" + str(self.ownIP) + "," + str(self.ownPort) + ")")
-                        
+
                         # Wait for client to connect
                         while self.state == 'initialized':
                             try:
-                                #print("about to run controller recvfrom")
+                                print("about to run controller recvfrom")
                                 input_from_client, clientAddress = sock.recvfrom(1024)
                                 client_message = input_from_client.decode("UTF-8")
                                 print("client message is " + client_message)
