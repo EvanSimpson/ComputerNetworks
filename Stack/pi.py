@@ -48,6 +48,7 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.04, debug=False
 	time.sleep(duration)
 	print("turn carrier low")
 	turn_low(carrier_pin)
+	prepare_pins_in(data_pin, carrier_pin)
 
 def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.04, debug=False):
 	prepare_pins_in(data_pin, carrier_pin)

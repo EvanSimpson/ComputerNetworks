@@ -172,6 +172,8 @@ class Stack():
 		self.joesocket_commands[parsed_message['command']](**parsed_message['params'])
 
 	def add_new_client(self, port_letter, client_address):
+		if len(port_letter) == 1:
+			port_letter = '0' + port_letter
 		self.active_game_ports[port_letter] = client_address
 
 	def handle_input_from_gpio(self, message_received, incoming_address):
