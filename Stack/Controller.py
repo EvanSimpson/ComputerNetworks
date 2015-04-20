@@ -81,15 +81,16 @@ class Hangman(object):
                             try:
                                 print("about to run controller recvfrom")
                                 input_from_client, clientAddress = sock.recvfrom(1024)
+
+                            except:
+                                continue
+                            else:
                                 client_message = input_from_client.decode("UTF-8")
                                 print("client message is " + client_message)
                                 if client_message == "READY":
                                     print("got the ready message")
                                     self.state = 'ready'
                                     self.clientAddress = clientAddress
-
-                            except:
-                                continue
 
                         while self.state == 'ready':
                             inputWord = input("Enter the word to be guessed:\n")
