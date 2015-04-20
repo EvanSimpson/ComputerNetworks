@@ -194,7 +194,7 @@ class Stack():
 		print("in send message to application")
 		destination_port = udp_input[3]
 		print("destination port is " + str(destination_port))
-		print("active game ports: " + str(active_game_ports))
+		print("active game ports: " + str(self.active_game_ports))
 		if destination_port in self.active_game_ports:
 			destination_address = self.active_game_ports[destination_port]
 			print("destination address is: " + str(destination_address))
