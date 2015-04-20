@@ -136,7 +136,7 @@ class JoeSocket(object):
             #print("trying to recvrom")
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
-            from_stack, stack_address = self._pysock.recvfrom(1024, self._stack_address)
+            from_stack, stack_address = self._pysock.recvfrom(1024)
         except:
             #TODO throw the same error that the pysocket would have thrown
             pass
