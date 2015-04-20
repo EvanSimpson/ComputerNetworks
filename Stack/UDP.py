@@ -45,7 +45,7 @@ class UDP(object):
         if len(self.srcPort) == 1:
             self.srcPort = "0" + self.srcPort
 
-        if len(destPort) == 1:
+        if len(self.destPort) == 1:
             self.destPort = "0" + self.destPort
 
         if len(self.srcPort) != 2 or len(self.destPort) != 2:
