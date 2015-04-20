@@ -79,7 +79,6 @@ class Hangman(object):
                         # Wait for client to connect
                         while self.state == 'initialized':
                             try:
-                                print("about to run controller recvfrom")
                                 input_from_client, clientAddress = sock.recvfrom(1024)
 
                             except:

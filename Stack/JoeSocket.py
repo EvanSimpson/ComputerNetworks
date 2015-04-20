@@ -36,7 +36,6 @@ class JoeSocket(object):
         pi_id = config_params['id']
         ip = olinhost + pi_id
         port_num = self.generate_port_num()
-        print("our port num is: " + port_num)
         self._address = (ip, port_num)
 
     def generate_port_num(self):
@@ -116,9 +115,9 @@ class JoeSocket(object):
                         # TODO error handling here
                     else:
                         return 0
-        except e:
+        except:
             # TODO check error to make sure socket is still open
-            print(e)
+            pass
 
         self._closed = True
         self._pysock.close()
@@ -133,7 +132,6 @@ class JoeSocket(object):
         if not self._pysock:
             self._initialize_socket()
         try:
-            #print("trying to recvrom")
             #TODO this length needs to take into account the additional
             #     bytes for string formatting extra socket info
             from_stack, stack_address = self._pysock.recvfrom(1024)
@@ -141,10 +139,8 @@ class JoeSocket(object):
             #TODO throw the same error that the pysocket would have thrown
             pass
         else:
-            print("from stack is: " + str(from_stack))
             response = json.loads(from_stack.decode("UTF-8"))
-            print("response payload in joesocket is: " + str(response["payload"]))
-            return (response["payload"], response["address"])
+            return (bytearray(response["payload"], encoding="UTF-8"), response["address"])
 
     def sendto(self, send_bytes, address):
         # Send data to the socket. The socket should not be connected to a
@@ -152,11 +148,9 @@ class JoeSocket(object):
         # The optional flags argument has the same meaning as for recv() above.
         # Return the number of bytes sent. (The format of address depends on the
         # address family — see above.)
-        print("in joesocket sendto")
         if not self._pysock:
             self._initialize_socket()
         if len(send_bytes):
-            print(self._address)
             payload = bytearray(json.dumps({"command":"sendto", "params": {"source_address": self._address, "destination_address": address, "data": send_bytes.decode("utf-8")}}), encoding="utf-8")
             sent = self._pysock.sendto(payload, self._stack_address)
         else:
