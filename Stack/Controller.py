@@ -152,7 +152,7 @@ class Hangman(object):
                             self.view = View.View('_'*len(inputWord), [], 0)
                             self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
-
+# 
                     # Begin game
                     while self.state == 'play':
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
