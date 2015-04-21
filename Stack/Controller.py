@@ -159,9 +159,9 @@ class Hangman(object):
                         self.sendLetterToHost(inputLetter.upper())
 
                         if len(inputLetter) == 1:
-                            if inputLetter not in self.guessed:
-                                self.guessed.append(inputLetter)
-                                newPositions = self.model.checkPosition(inputLetter)
+                            if inputLetter.upper() not in self.guessed:
+                                self.guessed.append(inputLetter.upper())
+                                newPositions = self.model.checkPosition(inputLetter.upper())
                                 self.view.guess = self.guessed
                                 self.view.hits = self.model.strikes
                                 self.view.word = self.model.blanks
