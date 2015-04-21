@@ -97,16 +97,16 @@ class Hangman(object):
                                 print('The word must only contain the letters a-z.')
                                 continue
 
-                            self.model = Model.Model(inputWord.lower())
+                            self.model = Model.Model(inputWord.upper())
                             self.view = View.View('_'*len(inputWord), [], 0)
-                            self.sendWordToClient(inputWord.lower())
+                            self.sendWordToClient(inputWord.upper())
                             self.state = 'play'
 
                         # Begin play mode
                         while self.state == 'play':
                             try:
                                 input_letter_bits, client_address = sock.recvfrom(1024)
-                                input_letter = input_letter_bits.decode("UTF-8")
+                                input_letter = input_letter_bits.decode("UTF-8").upper()[0]
 
                                 if len(input_letter) == 1:
                                     if input_letter not in self.guessed:
@@ -156,7 +156,7 @@ class Hangman(object):
                     # Begin game
                     while self.state == 'play':
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
-                        self.sendLetterToHost(inputLetter)
+                        self.sendLetterToHost(inputLetter.upper())
 
                         if len(inputLetter) == 1:
                             if inputLetter not in self.guessed:
