@@ -176,11 +176,11 @@ class Hangman(object):
                             sys.exit(0)
 
             if self.state == 'win':
-                print("You lose!")
+                print("You win!")
                 break
 
             if self.state == 'lose':
-                print("You win!")
+                print("You lose!")
                 break
 
 if __name__ == "__main__":
