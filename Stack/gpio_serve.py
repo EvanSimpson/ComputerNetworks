@@ -45,11 +45,11 @@ class GPIOServe(object):
 
             while True:
                 try:
-
                     # Check if something has come in from the GPIO and send it
                     # over to the stack if so
                     if send_buffer_lock.acquire():
                         if len(send_buffer) > 0 and self.stack_address:
+                            print("got a message to send to stack" + str(send_buffer))
                             s.sendto(bytearray(send_buffer[0], encoding="UTF-8"), self.stack_address)
                             del send_buffer[0]
                         send_buffer_lock.release()
@@ -69,8 +69,11 @@ class GPIOServe(object):
                     # over to the GPIO if so
                     (from_stack, stack_address) = s.recvfrom(1024)
                     self.stack_address = stack_address
+                    print("Received data from stack")
                     data = from_stack.decode("UTF-8")
+                    print(data)
                     if len(data) > 1:
+                        print("about to transmit over the pi")
                         pi.transmit(data)
 
                 except socket.error:

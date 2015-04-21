@@ -2,6 +2,8 @@ import sys
 import JoeSocket
 import Model
 import View
+from read_config import get_config_params
+import generate_port
 
 class Hangman(object):
 
@@ -45,11 +47,12 @@ class Hangman(object):
     def sendReady(self):
         msg = 'READY'
         byteMsg = bytearray(msg, encoding="UTF-8")
+        print("about to send ready message")
         return self.sock.sendto(byteMsg, self.hostAddress)
 
 
     def play(self):
-        print("Welcome to Hangman 3000!\n")
+        print("Welcome to NumberHang!\n")
         while True:
 
             # Setup client or host mode
@@ -71,36 +74,39 @@ class Hangman(object):
                     while True:
                         self.sock.bind((self.ownIP, self.ownPort))
                         self.sock.settimeout(2.0)
+                        print("Starting a game at " + "(" + str(self.ownIP) + "," + str(self.ownPort) + ")")
 
                         # Wait for client to connect
                         while self.state == 'initialized':
                             try:
                                 input_from_client, clientAddress = sock.recvfrom(1024)
-                                client_message = input_from_client.decode("UTF-8")
-
-                                if client_message == "READY":
-                                    self.state = 'ready'
-                                    self.clientAddress = clientAddress
 
                             except:
                                 continue
+                            else:
+                                client_message = input_from_client.decode("UTF-8")
+                                print("client message is " + client_message)
+                                if client_message == "READY":
+                                    print("got the ready message")
+                                    self.state = 'ready'
+                                    self.clientAddress = clientAddress
 
                         while self.state == 'ready':
-                            inputWord = input("Enter the word to be guessed:\n")
+                            inputWord = input("Enter the word to be guessed:\n").upper()
                             if not inputWord.isalpha():
                                 print('The word must only contain the letters a-z.')
                                 continue
 
-                            self.model = Model.Model(inputWord.lower())
+                            self.model = Model.Model(inputWord.upper())
                             self.view = View.View('_'*len(inputWord), [], 0)
-                            self.sendWordToClient(inputWord.lower())
+                            self.sendWordToClient(inputWord.upper())
                             self.state = 'play'
 
                         # Begin play mode
                         while self.state == 'play':
                             try:
                                 input_letter_bits, client_address = sock.recvfrom(1024)
-                                input_letter = input_letter_bits.decode("UTF-8")
+                                input_letter = input_letter_bits.decode("UTF-8").upper()[0]
 
                                 if len(input_letter) == 1:
                                     if input_letter not in self.guessed:
@@ -139,22 +145,23 @@ class Hangman(object):
                     # Wait for input word to come from host
                     while self.state == 'ready':
                         try:
-                            inputWord, hostAddress = sock.recvfrom(1024)
+                            inputWord, hostAddress = self.sock.recvfrom(1024)
+                        except:
+                            continue
+                        else:
                             self.view = View.View('_'*len(inputWord), [], 0)
                             self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
-                        except:
-                            continue
 
                     # Begin game
                     while self.state == 'play':
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
-                        self.sendLetterToHost(inputLetter)
+                        self.sendLetterToHost(inputLetter.upper())
 
                         if len(inputLetter) == 1:
-                            if inputLetter not in self.guessed:
-                                self.guessed.append(inputLetter)
-                                newPositions = self.model.checkPosition(inputLetter)
+                            if inputLetter.upper() not in self.guessed:
+                                self.guessed.append(inputLetter.upper())
+                                newPositions = self.model.checkPosition(inputLetter.upper())
                                 self.view.guess = self.guessed
                                 self.view.hits = self.model.strikes
                                 self.view.word = self.model.blanks
@@ -177,7 +184,8 @@ class Hangman(object):
                 break
 
 if __name__ == "__main__":
-   IP = 'localhost'
-   port = 5280
-   host = Hangman(IP, port)
-   host.play()
+    params = get_config_params()
+    IP = params['LAN'] + params['id']
+    port = '19'
+    host = Hangman(IP, port)
+    host.play()

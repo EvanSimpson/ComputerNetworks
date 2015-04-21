@@ -23,10 +23,9 @@ def turn_low(pin):
 def read_pin(pin):
 	return GPIO.input(pin)
 
-def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.02, debug=False):
+def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.04, debug=False):
 	prepare_pins_in(data_pin,carrier_pin)
 	counter = 0
-	print(data)
 	while(True):
 		busy = read_pin(carrier_pin)
 		if (busy == 0):
@@ -37,10 +36,9 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.02, debug=False
 			break
 		time.sleep(duration)
 	prepare_pins_out(data_pin, carrier_pin)
+	print("turn carrier high")
 	turn_high(carrier_pin)
 	for i in range(len(data)):
-		if debug:
-			print(data[i])
 		if data[i]=="1":
 			turn_high(data_pin)
 		else:
@@ -48,9 +46,11 @@ def transmit(data, data_pin = 18, carrier_pin = 23, duration = 0.02, debug=False
 		time.sleep(duration)
 	turn_low(data_pin)
 	time.sleep(duration)
+	print("turn carrier low")
 	turn_low(carrier_pin)
+	prepare_pins_in(data_pin, carrier_pin)
 
-def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.02, debug=False):
+def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.04, debug=False):
 	prepare_pins_in(data_pin, carrier_pin)
 	times = []
 	def data_callback(channel):
@@ -59,10 +59,6 @@ def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.02, debug
 		times.append(time.time())
 		if not read_pin(carrier_pin):
 			times.append(-1)
-			if debug:
-				print("Carrier down")
-		elif debug:
-			print("Carrier up")
 	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
 	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
 	if lock.acquire():
@@ -73,25 +69,6 @@ def receive(lock, recv_flag, data_pin=18, carrier_pin = 23, duration=0.02, debug
 				times = []
 			lock.acquire(blocking=True)
 	lock.release()
-
-def receive_no_lock(data_pin=18, carrier_pin=23, duration=0.01, debug=True):
-	prepare_pins_in(data_pin, carrier_pin)
-	times = []
-	def data_callback(channel):
-		times.append(time.time())
-	def carrier_callback(channel):
-		times.append(time.time())
-		if not read_pin(carrier_pin):
-			times.append(-1)
-			if debug:
-				print("Carrier down")
-		elif debug:
-			print("Carrier up")
-	GPIO.add_event_detect(data_pin, GPIO.BOTH, callback=data_callback)
-	GPIO.add_event_detect(carrier_pin, GPIO.BOTH, callback=carrier_callback)
-	while True:
-		if len(times)>0 and times[-1] == -1:
-			return process(times[:-1], duration)
 
 def process(times, duration):
 	binput = ""

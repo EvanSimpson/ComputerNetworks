@@ -1,7 +1,9 @@
 from codes import *
 
 def morse_up(bin_input):
-  return bin2bytearray(bin_input)
+  to_return = bin2bytearray(bin_input)
+  print(to_return)
+  return to_return
 
 def morse_down(bytearray_input):
   return bytearray2bin(bytearray_input)
@@ -28,7 +30,6 @@ def bin2message(bin_message):
       words.pop()
   bin_letters = [word.split('000') for word in words]
   ret = ' '.join(map(bin2morse, bin_letters))
-  print(ret)
   return ret
 
 def message2bin(message):

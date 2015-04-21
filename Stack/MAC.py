@@ -8,7 +8,7 @@ def encode_mac(param_tuple):
 	# (src_ip, dest_ip, ip_packet)
 	src_mac = MAC_TABLE.get(param_tuple[0], "0")
 	dest_mac = MAC_TABLE.get(param_tuple[1], "0")
-	
+
 	mac_obj = MAC(src_mac, dest_mac, param_tuple[2])
 	return mac_obj.packet
 

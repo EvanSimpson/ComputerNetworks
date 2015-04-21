@@ -10,9 +10,8 @@ def byteArrayToInt(data):
 
 def encode_udp(param_tuple):
     # param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
-    udp_obj = UDP(param_tuple[0], param_tuple[3], param_tuple[6])
+    udp_obj = UDP(param_tuple[0], destPort=param_tuple[3], payload=param_tuple[6])
     udp_packet = udp_obj.packet
-
     return (param_tuple[1], param_tuple[2], param_tuple[4], param_tuple[5], "A", udp_packet)
 
 def decode_udp(param_tuple):
@@ -30,7 +29,7 @@ def encode_ip(param_tuple):
 
 def decode_ip(mac_obj):
     ip = IP(mac_obj.payload)
-    
+
     return (ip.srcLan, ip.srcHost, ip.destLan, ip.destHost, ip.payload)
 
 class UDP(object):
@@ -39,15 +38,21 @@ class UDP(object):
             self.srcPort = srcPort
             self.destPort = destPort
             self.payload = payload
-            self.packet = self.srcPort + self.destPort + self.payload
         else:
             self.parse(srcPort)
+
+        if len(self.srcPort) == 1:
+            self.srcPort = "0" + self.srcPort
+
+        if len(self.destPort) == 1:
+            self.destPort = "0" + self.destPort
 
         if len(self.srcPort) != 2 or len(self.destPort) != 2:
             raise ValueError
 
+        self.packet = self.srcPort + self.destPort + self.payload
+
     def parse(self, packet):
-        self.packet = packet
         self.srcPort = packet[0:2]
         self.destPort = packet[2:4]
         self.payload = packet[4:]
@@ -82,4 +87,3 @@ if __name__ == "__main__":
     print(packet)
     info = decode_udp(decode_ip(packet))
     print(info)
-

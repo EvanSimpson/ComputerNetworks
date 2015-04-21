@@ -15,22 +15,23 @@ gpioport = 5003
 local_lan = "C"
 router_mac = "0"
 local_mac_addresses = {
+	"C0" : "0",
 	"C1" : "X",
 	"C2" : "Y",
 	"C3" : "Z"
 }
 
 LANs = {
-	"A" : "127.0.0.1",
-	"B" : "127.0.0.1",
-	"C" : "127.0.0.1",
-	"D" : "127.0.0.1"
+	"A" : "192.168.128.103",
+	"B" : "192.168.128.108",
+	"C" : "192.168.128.111",
+	"D" : "192.168.128.102"
 }
 
 class Stack():
 
-	def __init__(self, is_router=False):
-		self.mac_address = "Y" # Temporary - this should be loaded from a config file
+	def __init__(self, mac_address, is_router=False):
+		self.mac_address = mac_address # Temporary - this should be loaded from a config file
 		self.is_router = is_router
 		self.active_game_ports = {}
 		self.joesocket_commands = {
@@ -89,7 +90,6 @@ class Stack():
 	def receive_from_games(self):
 		try:
 			(input_from_client, client_address) = self.game_server_socket.recvfrom(1024)
-			self.handle_input_from_client(input_from_client, client_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.game_server_socket.close()
@@ -105,13 +105,15 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
+		except socket.error as e:
 			pass
+		else:
+			print("input from client: " + str(input_from_client))
+			self.handle_input_from_client(input_from_client, client_address)
 
 	def receive_over_switch(self):
 		try:
 			(incoming, socket_server_address) = self.switch_socket.recvfrom(1024)
-			self.handle_input_from_switch(incoming, socket_server_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			self.switch_socket.close()
@@ -123,13 +125,14 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
+		except socket.error as e:
 			pass
+		else:
+			self.handle_input_from_switch(incoming, socket_server_address)
 
 	def receive_over_gpio(self):
 		try:
 			(incoming, gpio_address) = self.gpio_server_socket.recvfrom(1024)
-			self.handle_input_from_gpio(incoming, gpio_address)
 		except KeyboardInterrupt:
 			self.gpio_server_socket.close()
 			if self.is_router:
@@ -144,8 +147,11 @@ class Stack():
 			else:
 				print(e)
 				sys.exit(1)
-		except:
+		except socket.error as e:
 			pass
+		else:
+			print("incoming: " + str(incoming))
+			self.handle_input_from_gpio(incoming, gpio_address)
 
 	#handling inputs
 
@@ -158,7 +164,7 @@ class Stack():
 		self.send_message_internally(udp_input)
 
 	def handle_input_from_client(self, message_bytearray, client_address):
-
+		print(str(message_bytearray))
 		parsed_message = json.loads(message_bytearray.decode("UTF-8"))
 		if parsed_message['params']['source_address'][1] not in self.active_game_ports:
 			self.add_new_client(parsed_message['params']['source_address'][1], client_address)
@@ -166,31 +172,44 @@ class Stack():
 		self.joesocket_commands[parsed_message['command']](**parsed_message['params'])
 
 	def add_new_client(self, port_letter, client_address):
+		if len(port_letter) == 1:
+			port_letter = '0' + port_letter
 		self.active_game_ports[port_letter] = client_address
 
 	def handle_input_from_gpio(self, message_received, incoming_address):
-		mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
-		if self.is_router:
-			self.route_message(mac_payload)
-		elif mac_payload.dest == self.mac_address:
-			udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
-			self.send_message_to_application(udp_input)
+		print("in handle input from gpio")
+		print("message received: " + str(message_received))
+		if len(message_received) > 0:
+			mac_payload = self.internal_stack.ascend(message_received.decode("UTF-8"))
+			print("mac payload: " + str(mac_payload))
+			print("mac_payload dest is " + str(mac_payload.dest))
+			print("mac address is " + str(self.mac_address))
+			if self.is_router:
+				self.route_message(mac_payload)
+			elif mac_payload.dest == self.mac_address:
+				print("about to ascend stack")
+				udp_input = self.full_stack.ascend(message_received.decode("UTF-8"))
+				print("udp input is : " + str(udp_input))
+				self.send_message_to_application(udp_input)
 
 	def send_message_to_application(self, udp_input):
 		# udp_input = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
+		print("in send message to application")
 		destination_port = udp_input[3]
+		print("destination port is " + str(destination_port))
+		print("active game ports: " + str(self.active_game_ports))
 		if destination_port in self.active_game_ports:
 			destination_address = self.active_game_ports[destination_port]
-
+			print("destination address is: " + str(destination_address))
 			payload = udp_input[6]
 			source = (udp_input[1]+udp_input[2], udp_input[0])
 
-			to_send = json.dumps([{'payload': payload, 'address': source}])
-
+			to_send = json.dumps({'payload': payload, 'address': source})
+			print("to send is " + str(to_send))
 			try:
-				game_server_socket.sendto(to_send, destination_address)
-
-			except:
+				print("about to send to game_server_socket: " + str(destination_address))
+				self.game_server_socket.sendto(bytearray(to_send, encoding="UTF-8"), destination_address)
+			except socket.error as e:
 				pass
 
 	def route_message(self, mac_obj):
@@ -217,7 +236,7 @@ class Stack():
 			source_host_ip = udp_input[2]
 			source_mac_address = local_mac_addresses[local_lan+source_host_ip]
 		else:
-			source_mac_address = router_mac
+			source_mac_address = self.mac_address # the router's MAC address
 		print("source address: "+ source_mac_address)
 		print("dest address: " + destination_mac_address)
 		#does the socket want a bytearray or a string?
@@ -231,7 +250,7 @@ class Stack():
 		#to_send should be a bytearray but I'm not suuure
 		try:
 			self.switch_socket.sendto(serialized_udp_packet, (destination_lan_ip, routerport))
-		except:
+		except socket.error as e:
 			pass
 
 	# functions called on joesocket commands
@@ -247,14 +266,14 @@ class Stack():
 		self.send_acknowledgement(socket_port)
 
 	def joesocket_sendto(self, source_address, destination_address, data):
+		print("in send to: " + str(data))
 		self.send_message_over_gpio(source_address, destination_address, data)
-		self.send_acknowledgement(self.active_game_ports[source_address[1]])
 
 	def send_acknowledgement(self, client_address):
 		return_message = bytearray(json.dumps({"Error": 0}), encoding="UTF-8")
 		try:
 			self.game_server_socket.sendto(return_message, client_address)
-		except:
+		except socket.error as e:
 			pass
 
 	#sending data over gpio based on input from joesocket
@@ -262,12 +281,14 @@ class Stack():
 	def send_message_over_gpio(self, source_address, destination_address, message_to_send):
 		# address = (LAN+host, port)
 		# param_tuple = (srcPort, srcLan, srcHost, destPort, destLan, destHost, payload)
-		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], destination_address[1], destination_address[0][0], destination_address[0][1], message_to_send)
+		stack_entry = (source_address[1], source_address[0][0], source_address[0][1], str(destination_address[1]), destination_address[0][0], destination_address[0][1], message_to_send)
 		to_transmit_string = self.full_stack.descend(stack_entry)
 		to_transmit = bytearray(to_transmit_string, encoding='UTF-8')
+		print("to transmit: " + to_transmit_string)
 		try:
+			print("about to send the message")
 			self.gpio_server_socket.sendto(to_transmit, self.gpio_address)
-		except:
+		except socket.error as e:
 			pass
 
 if __name__ == "__main__":
