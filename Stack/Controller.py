@@ -52,7 +52,7 @@ class Hangman(object):
 
 
     def play(self):
-        print("Welcome to Hangman 3000!\n")
+        print("Welcome to NumberHang!\n")
         while True:
 
             # Setup client or host mode
