@@ -92,7 +92,7 @@ class Hangman(object):
                                     self.clientAddress = clientAddress
 
                         while self.state == 'ready':
-                            inputWord = input("Enter the word to be guessed:\n")
+                            inputWord = input("Enter the word to be guessed:\n").upper()
                             if not inputWord.isalpha():
                                 print('The word must only contain the letters a-z.')
                                 continue
