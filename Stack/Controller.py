@@ -152,7 +152,7 @@ class Hangman(object):
                             self.view = View.View('_'*len(inputWord), [], 0)
                             self.model = Model.Model(inputWord.decode("UTF-8"))
                             self.state = 'play'
-
+# 
                     # Begin game
                     while self.state == 'play':
                         inputLetter = input('Enter a letter to guess or type `quit` to quit:\n')
@@ -176,11 +176,11 @@ class Hangman(object):
                             sys.exit(0)
 
             if self.state == 'win':
-                print("You win!")
+                print("You lose!")
                 break
 
             if self.state == 'lose':
-                print("You lose!")
+                print("You win!")
                 break
 
 if __name__ == "__main__":
