@@ -1,0 +1,4 @@
+is_router:False
+LAN:C
+MAC:X
+id:1
